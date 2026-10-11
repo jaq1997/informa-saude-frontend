@@ -34,7 +34,6 @@ export default function Dashboard() {
         </main>
 
         <FooterSistemaMobile />
-        <ChatAssistant />
       </div>
     </JornadasProvider>
   );
