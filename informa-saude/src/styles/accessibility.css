@@ -938,3 +938,69 @@ html.alto-contraste .is-btn.disabled {
   opacity: 0.65 !important;
   cursor: not-allowed !important;
 }
+
+html.alto-contraste .dashboard-card,
+html.alto-contraste .learning-card,
+html.alto-contraste .weekly-card,
+html.alto-contraste .xp-card,
+html.alto-contraste .stat-card {
+  background-color: var(--is-contrast-surface) !important;
+  color: var(--is-contrast-text) !important;
+  border-color: var(--is-contrast-accent) !important;
+}
+
+html.alto-contraste .learning-card-label,
+html.alto-contraste .learning-card-message,
+html.alto-contraste .weekly-day-label,
+html.alto-contraste .xp-labels,
+html.alto-contraste .stat-card p {
+  color: var(--is-contrast-text) !important;
+}
+
+html.alto-contraste .learning-card-value,
+html.alto-contraste .stat-card h2,
+html.alto-contraste .stat-card strong {
+  color: var(--is-contrast-accent) !important;
+}
+
+html.alto-contraste .weekly-card-header {
+  background-color: var(--is-contrast-accent) !important;
+  color: var(--is-contrast-on-accent) !important;
+}
+
+html.alto-contraste .learning-card-label {
+  border-color: var(--is-contrast-accent) !important;
+}
+
+html.alto-contraste .weekly-day-status {
+  border-color: var(--is-contrast-accent) !important;
+}
+
+html.alto-contraste .weekly-day-status.is-complete {
+  background-color: var(--is-contrast-accent) !important;
+  border-color: var(--is-contrast-accent) !important;
+  color: var(--is-contrast-on-accent) !important;
+}
+
+html.alto-contraste .xp-value {
+  background-color: var(--is-contrast-surface) !important;
+  border-color: var(--is-contrast-accent) !important;
+  color: var(--is-contrast-text) !important;
+}
+
+html.alto-contraste .xp-value.is-current {
+  background-color: var(--is-contrast-accent) !important;
+  color: var(--is-contrast-on-accent) !important;
+}
+
+html.alto-contraste .xp-bar {
+  background-color: var(--is-contrast-accent) !important;
+}
+
+html.alto-contraste .xp-bar.is-current {
+  background-color: var(--is-contrast-text) !important;
+}
+
+html.alto-contraste .stat-card-icon {
+  color: var(--is-contrast-accent) !important;
+}

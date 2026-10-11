@@ -14,6 +14,7 @@ import EditarPerfil from "./pages/Sistema-frontend/EditarPerfil";
 import Configuracoes from "./pages/Sistema-frontend/Configuracoes";
 import Questionario from "./pages/Questionario/Questionario";
 import NaoEncontrada from "./pages/NaoEncontrada/NaoEncontrada";
+import Dashboard from "./pages/Dashboard/Dashboard";
 import JornadaDetalhesPage from "./pages/Sistema-frontend/JornadaDetalhesPage";
 
 import { ScrollToTop } from './components';
@@ -70,6 +71,7 @@ function App() {
           <Route path="/404" element={<NaoEncontrada />} />
           <Route path="/404.html" element={<NaoEncontrada />} />
           <Route path="*" element={<NaoEncontrada />} />
+          <Route path="/dashboard" element={<Dashboard />} />
         </Routes>
       </BrowserRouter>
     </UserProvider>

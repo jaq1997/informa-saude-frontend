@@ -41,3 +41,251 @@
   background-color: var(--is-surface-muted) !important;
   color: var(--is-text) !important;
 }
+
+.dashboard-card {
+  height: 100%;
+  border: 1px solid var(--is-green-light);
+  border-radius: 0.5rem;
+  background: var(--is-green-dark);
+}
+
+.learning-card {
+  min-height: 22rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  color: var(--is-green-light);
+}
+
+.learning-card-label {
+  width: 100%; 
+  margin: 0; 
+  padding: 0.5rem 1rem; 
+  border: 1px solid var(--is-green); 
+  border-radius: 0.5rem; 
+  text-align: center; 
+  font-size: 1.25rem; 
+  font-weight: 900;
+}
+
+.learning-card-value {
+  margin-top: 0.5rem; 
+  color: var(--is-orange); 
+  font-size: clamp(4rem, 30vw, 6rem);
+  line-height: 1; 
+  font-weight: 900;
+}
+
+.learning-card-message {
+  margin: 0.5rem 0 0; 
+  font-weight: 800;
+}
+
+.learning-card-action {
+  width: 100%; 
+  margin-top: 1rem;
+  padding-block: 0.75rem;
+}
+
+.weekly-card {
+  overflow: hidden;
+  height: fit-content;
+  background: var(--is-green-light);
+  border: 1px solid var(--is-green-dark);
+}
+
+.weekly-card-header {
+  padding: 0.75rem 1.25rem; 
+  background: var(--is-green-dark); 
+  color: var(--is-green-light); 
+  text-align: center; 
+  font-weight: 900;
+}
+
+.weekly-days {
+  display: grid; 
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.25rem; 
+  padding: 1.25rem 0.75rem;
+}
+
+.weekly-day {
+  min-width: 0; 
+  display: flex; 
+  flex-direction: column; 
+  align-items: center; 
+  gap: 0.75rem;
+}
+
+.weekly-day-label {
+  font-size: 0.75rem; 
+  font-weight: 800;
+  color: var(--is-green-dark);
+}
+
+.weekly-day-status {
+  width: 1.5rem; 
+  height: 1.5rem; 
+  display: grid; 
+  place-items: center; 
+  flex: 0 0 auto; 
+  border: 2px dashed var(--is-orange);
+  border-radius: 50%; 
+  color: transparent; 
+}
+
+.weekly-day-status.is-complete { 
+  border-style: solid; 
+  border-color: var(--is-orange); 
+  background: var(--is-orange); 
+  color: var(--is-green-light); 
+}
+
+.weekly-day-check { 
+  width: 1rem; 
+  height: 1rem; 
+}
+
+.xp-card {
+  padding: 1.25rem;
+  background: var(--is-green-light);
+  border: 1px solid var(--is-green-dark);
+}
+
+.xp-summary {
+  max-width: 32rem; 
+  margin: 0 auto; 
+  text-align: center; 
+  font-size: 0.875rem; 
+  line-height: 1.4;
+}
+
+.xp-summary strong {
+  color: var(--is-orange);
+}
+
+.xp-summary strong:last-child { 
+  color: inherit; 
+}
+
+.xp-chart {
+  height: 16rem; 
+  display: grid; 
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: end; 
+  gap: 1rem; 
+  margin-top: 1.75rem;
+}
+
+.xp-column {
+  height: 100%; 
+  min-width: 0; 
+  display: flex; 
+  flex-direction: column; 
+  align-items: center; 
+  justify-content: flex-end; 
+  gap: 0.5rem;
+}
+
+.xp-value {
+  padding: 0.25rem 0.625rem; 
+  border-radius: 0.5rem; 
+  background: var(--is-orange-light); 
+  color: var(--is-orange-dark);
+  border: 1px solid var(--is-orange); 
+  font-size: 0.75rem; 
+  font-weight: 800; 
+  white-space: nowrap;
+}
+
+.xp-value.is-current { 
+  background: var(--is-orange); 
+  color: var(--is-orange-light); 
+}
+
+.xp-bar {
+  width: min(100%, 6rem); 
+  height: var(--bar-height); 
+  flex: 0 0 auto; 
+  border-radius: 0.5rem 0.5rem 0 0; 
+  background: #004840c7;
+}
+
+.xp-bar--25 { --bar-height: 25%; }
+.xp-bar--30 { --bar-height: 30%; }
+.xp-bar--35 { --bar-height: 35%; }
+.xp-bar--40 { --bar-height: 40%; }
+.xp-bar--45 { --bar-height: 45%; }
+.xp-bar--50 { --bar-height: 50%; }
+.xp-bar--55 { --bar-height: 55%; }
+.xp-bar--60 { --bar-height: 60%; }
+.xp-bar--65 { --bar-height: 65%; }
+.xp-bar--70 { --bar-height: 70%; }
+.xp-bar--75 { --bar-height: 75%; }
+.xp-bar--80 { --bar-height: 80%; }
+
+.xp-bar.is-current {
+  background: var(--is-green-dark);
+}
+
+.xp-labels {
+  display: grid; 
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem; 
+  margin-top: 0.75rem; 
+  color: var(--is-green-dark); 
+  text-align: center; 
+  font-size: 0.75rem; 
+  line-height: 1.2;
+}
+
+.stat-card {
+  min-height: 12rem; 
+  display: grid; 
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center; 
+  gap: 1rem; 
+  padding: 1.25rem;
+}
+
+.stat-card-copy {
+  min-width: 0;
+}
+
+.stat-card h2 {
+  margin: 0; 
+  color: var(--is-orange); 
+  font-size: 1.5rem; 
+  line-height: 1.25; 
+  font-weight: 900;
+}
+
+.stat-card p {
+  margin: 1.5rem 0 0; 
+  color: var(--is-green-light); 
+  font-size: 0.875rem; 
+  line-height: 1.4;
+}
+
+.stat-card strong {
+  color: var(--is-orange);
+}
+
+.stat-card-icon {
+  width: 5rem; 
+  height: 5rem; 
+  flex: 0 0 auto; 
+  color: var(--is-orange); 
+}
+
+@media (min-width: 768px) {
+  .learning-card { 
+    min-height: 0; 
+  }
+
+  .learning-card-value { 
+    font-size: 7.2rem; 
+  }
+}
