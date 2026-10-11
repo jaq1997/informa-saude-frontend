@@ -6,7 +6,6 @@ import imgRespiracao from '../../assets/images/imagem-respiracao.webp';
 import imgProgresso from '../../assets/images/acompanhe-progresso.webp';
 import {
   SystemNavbar,
-  ChatAssistant,
   CardSistema,
   FooterSistemaMobile,
   TituloPaginaSistema,
@@ -90,6 +89,7 @@ export function HomeSistema() {
           titulo="Jornada Cardíaca"
           descricao="Aprenda como pequenos hábitos diários podem auxiliar na prevenção de infarto, controle de hipertensão e muito mais!"
           textoBotao="Iniciar Jornada"
+          to="/jornada/cardiaca"
           className="mb-5"
         />
 
@@ -103,6 +103,7 @@ export function HomeSistema() {
                   categoria={jornada.categoria}
                   titulo={jornada.titulo}
                   progresso={jornada.progresso}
+                  to="/jornada/cardiaca"
                 />
               </div>
             ))}
@@ -119,6 +120,7 @@ export function HomeSistema() {
                   imagem={jornada.imagem}
                   titulo={jornada.titulo}
                   textoBotao={jornada.textoBotao}
+                  to={`/jornada/${jornada.id}`}
                 />
               </div>
             ))}
@@ -138,7 +140,6 @@ export function HomeSistema() {
       </main>
 
       <FooterSistemaMobile />
-      <ChatAssistant />
     </div>
   );
 }

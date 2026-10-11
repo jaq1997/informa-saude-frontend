@@ -245,3 +245,224 @@
     max-height: 40px;
   }
 }
+
+/* ==========================================================================
+   TELA DE JORNADA DETALHES (Design System + Tokens)
+   ========================================================================== */
+.is-jornada-page {
+  background-color: var(--is-green-dark);
+  color: var(--is-white);
+  min-height: 100vh;
+  padding-bottom: 3rem;
+}
+
+.is-jornada-hero {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  min-height: 420px;
+  background-color: var(--is-green-dark);
+  width: 100%;
+}
+
+.is-jornada-hero-bg {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: 100%;
+  z-index: 0;
+}
+
+.is-jornada-hero-img-wrapper {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: 60%;
+}
+
+.is-jornada-hero-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+}
+
+.is-jornada-hero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to right, var(--is-green-dark) 0%, rgba(0, 72, 64, 0.6) 40%, transparent 100%);
+}
+
+.is-jornada-hero-mobile-img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.3;
+}
+
+.is-jornada-hero-content {
+  position: relative;
+  z-index: 2;
+  max-width: 640px;
+}
+
+.is-jornada-back-link {
+  color: var(--is-white);
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.is-jornada-back-link:hover {
+  color: var(--is-green-light);
+}
+
+.is-jornada-hero-title {
+  color: var(--is-white);
+  line-height: 1.15;
+  font-weight: 700;
+}
+
+.is-jornada-hero-subtitle {
+  color: var(--is-white);
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.is-jornada-hero-desc {
+  color: var(--is-white);
+  font-size: 1.05rem;
+  font-weight: 500;
+  max-width: 540px;
+}
+
+.is-jornada-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--is-white);
+}
+
+.is-jornada-tabs-nav {
+  border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+  margin-bottom: 1.5rem;
+}
+
+.is-jornada-tab-btn {
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: var(--is-white);
+  opacity: 0.6;
+  font-size: 1.1rem;
+  font-weight: 700;
+  padding: 0 0 1rem 0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.is-jornada-tab-btn:hover {
+  opacity: 0.9;
+}
+
+.is-jornada-tab-btn.is-active {
+  opacity: 1;
+  border-bottom-color: var(--is-orange);
+}
+
+.is-jornada-episode-item {
+  padding-block: 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.is-jornada-episode-number {
+  color: var(--is-white);
+  opacity: 0.5;
+  font-family: monospace;
+  font-size: 1.8rem;
+  min-width: 48px;
+  display: inline-block;
+  font-weight: 700;
+}
+
+.is-jornada-thumb-container {
+  position: relative;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  height: 120px;
+  background-color: var(--is-green);
+  box-shadow: var(--is-shadow-sm);
+}
+
+.is-jornada-play-badge {
+  width: 44px;
+  height: 44px;
+  background-color: rgba(0, 0, 0, 0.4);
+  border: 2px solid var(--is-white);
+  color: var(--is-white);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.is-jornada-done-badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  margin: 0.5rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.5rem;
+  font-weight: 700;
+  font-size: 0.6rem;
+  letter-spacing: 0.5px;
+  background-color: var(--is-orange);
+  color: var(--is-white);
+  box-shadow: var(--is-shadow-sm);
+}
+
+.is-jornada-other-card {
+  position: relative;
+  border-radius: 1rem;
+  overflow: hidden;
+  height: 210px;
+  background-color: var(--is-green);
+  box-shadow: var(--is-shadow-md);
+  text-decoration: none;
+  display: block;
+}
+
+.is-jornada-other-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to top, rgba(0, 30, 25, 0.9) 0%, rgba(0, 72, 64, 0.3) 60%, transparent 100%);
+  z-index: 1;
+}
+
+.is-jornada-other-content {
+  padding: 1.5rem;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  height: 100%;
+  z-index: 2;
+}

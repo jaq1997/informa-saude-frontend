@@ -112,3 +112,45 @@
   color: var(--is-white) !important;
 }
 
+/* DropdownSistema Component */
+.is-dropdown-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 0.75rem;
+  border: 1px solid transparent;
+  font-weight: 700;
+  padding: 0.5rem 1rem;
+  font-size: 0.95rem;
+  cursor: pointer;
+  white-space: nowrap;
+  background-color: var(--is-green-light);
+  color: var(--is-green-dark);
+  box-shadow: var(--is-shadow-sm);
+  transition: all 0.2s ease;
+}
+
+.is-dropdown-trigger:hover {
+  background-color: var(--is-white);
+  border-color: var(--is-border);
+}
+
+.is-dropdown-trigger--dark-theme {
+  background-color: var(--is-white);
+  color: var(--is-green-dark);
+  box-shadow: var(--is-shadow-sm);
+}
+
+.is-dropdown-trigger--dark-theme:hover {
+  background-color: var(--is-green-light);
+}
+
+.is-dropdown-chevron {
+  color: var(--is-green);
+  transition: transform 0.2s ease;
+}
+
+.is-dropdown-chevron.is-open {
+  transform: rotate(180deg);
+}
+

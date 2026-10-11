@@ -58,7 +58,7 @@ export function CardSistema({
 
   if (isProgresso) {
     const porcentagem = Math.min(100, Math.max(0, progresso));
-    return (
+    const conteudoProgresso = (
       <article className={`is-card h-100 d-flex flex-column justify-content-between ${className}`}>
         <div>
           {categoria && <span className="is-eyebrow mb-2">{categoria}</span>}
@@ -82,11 +82,17 @@ export function CardSistema({
         </div>
       </article>
     );
+
+    if (to) {
+      return <Link to={to} className="text-decoration-none d-block h-100">{conteudoProgresso}</Link>;
+    }
+
+    return conteudoProgresso;
   }
 
   if (isMedia) {
     if (isHero) {
-      return (
+      const conteudoHero = (
         <article className={`is-hero-card p-4 p-md-5 shadow-sm ${className}`}>
           {imagem && <img src={imagem} alt={titulo} className="is-card-bg-img" />}
           <div className="is-hero-content col-12 col-lg-8">
@@ -94,16 +100,22 @@ export function CardSistema({
             <h2 className="fw-bold text-white display-4 mb-2">{titulo}</h2>
             {descricao && <p className="text-white fs-6 mb-4">{descricao}</p>}
             {textoBotao && (
-              <BotaoSistema variante={varianteBotao} onClick={onClick} className="fs-5 px-4 py-2">
+              <BotaoSistema variante={varianteBotao} onClick={onClick} to={to} href={href} className="fs-5 px-4 py-2">
                 {textoBotao} {IconeBotao && <IconeBotao size={20} fill="currentColor" />}
               </BotaoSistema>
             )}
           </div>
         </article>
       );
+
+      if (to && !textoBotao) {
+        return <Link to={to} className="text-decoration-none d-block">{conteudoHero}</Link>;
+      }
+
+      return conteudoHero;
     }
 
-    return (
+    const conteudoMedia = (
       <article className={`is-jornada-card ${centralizado ? 'text-center p-4 p-md-5' : ''} ${className}`}>
         {imagem && <img src={imagem} alt={titulo} className="is-card-bg-img" />}
         <div className={`is-jornada-content ${centralizado ? 'w-100 d-flex flex-column align-items-center justify-content-center' : ''}`}>
@@ -116,6 +128,8 @@ export function CardSistema({
               variante={varianteBotao}
               larguraTotal={!centralizado}
               onClick={onClick}
+              to={to}
+              href={href}
               className={`fs-6 py-2 ${centralizado ? 'px-4' : ''}`}
             >
               {textoBotao} {IconeBotao && <IconeBotao size={18} fill="currentColor" />}
@@ -124,6 +138,12 @@ export function CardSistema({
         </div>
       </article>
     );
+
+    if (to && !textoBotao) {
+      return <Link to={to} className="text-decoration-none d-block h-100">{conteudoMedia}</Link>;
+    }
+
+    return conteudoMedia;
   }
 
   return (

@@ -3,3 +3,10 @@ referencias/
 node_modules/
 dist/
 .DS_Store
+jornadas-conteudos/
+informa-saude/jornadas-conteudos/
+informa-saude/src/assets/images/*.jpg
+informa-saude/src/assets/images/*.jpeg
+informa-saude/src/assets/images/*.png
+*.jpg
+*.jpeg
