@@ -1,0 +1,277 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-principal);
+}
+.step-transition {
+  animation: stepIn 0.35s ease-out;
+}
+
+.forgot-container-RecoverEmailGet {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+}
+
+.forgot-card-RecoverEmailGet {
+  background: var(--is-white);
+  width: 100%;
+  max-width: 480px;
+  padding: 40px;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--is-border);
+}
+@keyframes stepIn {
+  from { opacity: 0; transform: translateX(24px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.back-button-RecoverEmailGet {
+  background-color: var(--is-green);
+  color: var(--is-white);
+  border: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  cursor: pointer;
+  margin-bottom: 24px;
+  transition: transform 0.2s ease, filter 0.2s ease;
+  text-decoration: none;
+}
+.back-button-RecoverEmailGet:hover {
+  filter: brightness(0.9);
+  transform: scale(1.05);
+}
+
+.title-RecoverEmailGet {
+  color: var(--is-orange);
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.subtitle-RecoverEmailGet {
+  color: var(--is-text);
+  opacity: 0.8;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  margin-bottom: 32px;
+}
+
+.forgot-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.input-group-RecoverEmailGet {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.input-group-RecoverEmailGet label {
+  color: var(--is-text);
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.input-group-RecoverEmailGet input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1.5px solid var(--is-border);
+  border-radius: 10px;
+  font-size: 1rem;
+  outline: none;
+  color: var(--is-text);
+  background-color: var(--is-white);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input-group-RecoverEmailGet input::placeholder {
+  color: var(--is-border);
+}
+
+.input-group-RecoverEmailGet input:focus {
+  border-color: var(--is-orange);
+  box-shadow: 0 0 0 3px rgba(245, 134, 52, 0.2);
+}
+.submit-button-RecoverEmailGet {
+  width: 100%;
+  padding: 16px;
+  background-color: var(--is-orange);
+  color: var(--is-white);
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter 0.2s ease, transform 0.1s ease;
+}
+
+.submit-button-RecoverEmailGet:hover {
+  filter: brightness(0.95);
+}
+
+.submit-button-RecoverEmailGet:active {
+  transform: scale(0.99);
+}
+
+.modal-overlay-RecoverEmailGet {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 1000;
+   animation: overlayIn 0.25s ease-out;
+}
+
+.modal-content-RecoverEmailGet {
+  background: var(--is-white);
+  width: 100%;
+  max-width: 380px;
+  border-radius: 20px;
+  padding: 32px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  animation: modalFadeIn 0.25s ease-out;
+   animation: boxIn 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.modal-icon-RecoverEmailGet {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: 4px solid var(--is-green);
+  color: var(--is-green);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+   animation: iconPop 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.4) 0.15s both;
+}
+
+.modal-title-RecoverEmailGet {
+  color: var(--is-green);
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.modal-text-RecoverEmailGet {
+  color: var(--is-text);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  opacity: 0.8;
+  margin-bottom: 28px;
+}
+
+.modal-text-RecoverEmailGet strong {
+  color: var(--is-text);
+  opacity: 1;
+}
+
+.modal-actions-RecoverEmailGet {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.btn-primary-RecoverEmailGet {
+  width: 100%;
+  padding: 14px;
+  background-color: var(--is-orange);
+  color: var(--is-white);
+  border: none;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter 0.2s ease, transform 0.1s ease;
+}
+
+.btn-primary-RecoverEmailGet:hover {
+  filter: brightness(0.95);
+}
+
+.btn-secondary-RecoverEmailGet {
+  width: 100%;
+  padding: 14px;
+  background-color: transparent;
+  color: var(--is-orange);
+  border: 1.5px solid var(--is-orange);
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btn-secondary-RecoverEmailGet:hover {
+  background-color: rgba(245, 134, 52, 0.05);
+}
+
+.btn-continue-RecoverEmailGet {
+  text-decoration: none;
+  width: 100%;
+  padding: 14px;
+  background-color: var(--is-green);
+  color: var(--is-white);
+  border: none;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter 0.2s ease, transform 0.1s ease;
+}
+
+.btn-continue-RecoverEmailGet:active {
+  transform: scale(0.99);
+}
+.Link-RecoverEmailGet {
+  text-decoration: none;
+  color: var(--is-white);
+}
+
+@media (max-width: 480px) {
+  .forgot-container-RecoverEmailGet {
+    padding: 0;
+    align-items: flex-start;
+    background-color: var(--is-white);
+  }
+
+  .forgot-card-RecoverEmailGet {
+    box-shadow: none;
+    border: none;
+    padding: 24px;
+  }
+}

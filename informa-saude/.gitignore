@@ -28,4 +28,9 @@ referencias/
 referencias-figma/
 "informa saúde app/"
 informa saúde app/
-proximos-ajustes.md
+jornadas-conteudos/
+
+# Imagens de teste locais
+src/assets/images/*.jpg
+src/assets/images/*.jpeg
+src/assets/images/*.png

@@ -26,6 +26,13 @@
   padding: 0.5rem 1rem;
   font-size: 0.95rem;
 }
+.button-recover-password {
+  border: none;
+  background-color: var(--is-white);
+}
+.button-recover-password:hover {
+  color: var(--is-green);
+}
 
 .btn.is-btn--profile,
 .is-btn.is-btn--profile {

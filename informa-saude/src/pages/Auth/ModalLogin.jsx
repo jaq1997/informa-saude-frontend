@@ -3,11 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { AuthModalLayout } from './AuthModalLayout';
 import { FormInput } from '../../components';
 import googleIcon from '../../assets/images/google.svg';
+import RecoverPasswordModal from '../RecoverPassword/RecoverEmailGet/RecoverPasswordModal'
 
 export function ModalLogin({ onClose, onAbrirCadastro }) {
   const navigate = useNavigate();
   const [usuario, setUsuario] = useState('');
   const [senha, setSenha] = useState('');
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     document.body.style.overflow = 'hidden';
@@ -47,15 +49,16 @@ export function ModalLogin({ onClose, onAbrirCadastro }) {
         />
 
         <div className="text-end mb-4">
-          <a href="/404.html" className="text-decoration-none fw-bold fs-6 text-dark">
-            Esqueci minha senha
-          </a>
+          <button  className='button-recover-password' type="button" onClick={() => setOpen(true)}>Esqueceu sua senha?</button>
+          <RecoverPasswordModal open={open} onClose={() => setOpen(false)} />
+
         </div>
 
         <div className="d-flex flex-column gap-2 mt-2">
           <button type="submit" className="is-btn is-btn--orange w-100 fs-6 py-2">
             Acessar conta
           </button>
+
 
           <div className="d-flex align-items-center gap-2 my-1">
             <hr className="flex-fill my-0 text-muted opacity-25" />

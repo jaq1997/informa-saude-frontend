@@ -15,6 +15,7 @@ import Configuracoes from "./pages/Sistema-frontend/Configuracoes";
 import Questionario from "./pages/Questionario/Questionario";
 import NaoEncontrada from "./pages/NaoEncontrada/NaoEncontrada";
 import Dashboard from "./pages/Dashboard/Dashboard";
+import JornadaDetalhesPage from "./pages/Sistema-frontend/JornadaDetalhesPage";
 
 import { ScrollToTop } from './components';
 import { UserProvider } from './context/UserContext';
@@ -65,6 +66,8 @@ function App() {
           <Route path="/editar-perfil" element={<EditarPerfil />} />
           <Route path="/configuracoes" element={<Configuracoes />} />
           <Route path="/questionario" element={<Questionario />} />
+          <Route path="/jornada/:id" element={<JornadaDetalhesPage />} />
+          <Route path="/jornadas" element={<Navigate to="/jornada/cardiaca" replace />} />
           <Route path="/404" element={<NaoEncontrada />} />
           <Route path="/404.html" element={<NaoEncontrada />} />
           <Route path="*" element={<NaoEncontrada />} />

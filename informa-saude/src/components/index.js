@@ -6,7 +6,6 @@ export { BarraAcessibilidade } from './BarraAcessibilidade/BarraAcessibilidade';
 export { ItemMeuPerfil } from './ItemMeuPerfil/ItemMeuPerfil';
 export { AvatarUsuario } from './AvatarUsuario/AvatarUsuario';
 export { FormInput } from './FormInput/FormInput';
-export { ChatAssistant } from './ChatAssistant/ChatAssistant';
 export { ToastFeedback } from './ToastFeedback/ToastFeedback';
 export { CarrosselSistema } from './Carrossel/CarrosselSistema';
 export { Logo } from './Logo/Logo';
@@ -25,3 +24,10 @@ export { default as CardDiasAprendidos } from './CardDiasAprendidos/CardDiasApre
 export { default as CardProgressoSemanal } from './CardProgressoSemanal/CardProgressoSemanal';
 export { default as XPChart } from './XPChart/XPChart';
 export { default as CardStat } from './CardStat/CardStat';
+export { DropdownSistema } from './DropdownSistema/DropdownSistema';
+export { IconeContraste } from './IconeContraste/IconeContraste';
+
+
+
+
+

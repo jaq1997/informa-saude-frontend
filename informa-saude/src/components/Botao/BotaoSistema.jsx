@@ -1,8 +1,11 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 export function BotaoSistema({
   children,
   onClick,
+  to,
+  href,
   variante = 'orange',
   tamanho = 'md',
   desabilitado = false,
@@ -36,13 +39,31 @@ export function BotaoSistema({
     return 'is-btn--profile';
   };
 
+  const classes = `is-btn ${obterClasseVariante()} ${obterClasseTamanho()} ${larguraTotal ? 'w-100' : ''} ${className}`;
+
+  if (to) {
+    return (
+      <Link to={to} className={`${classes} text-decoration-none d-inline-flex align-items-center justify-content-center gap-2`} aria-label={ariaLabel}>
+        {children}
+      </Link>
+    );
+  }
+
+  if (href) {
+    return (
+      <a href={href} className={`${classes} text-decoration-none d-inline-flex align-items-center justify-content-center gap-2`} aria-label={ariaLabel}>
+        {children}
+      </a>
+    );
+  }
+
   return (
     <button
       type={tipo}
       onClick={onClick}
       disabled={desabilitado}
       aria-label={ariaLabel}
-      className={`is-btn ${obterClasseVariante()} ${obterClasseTamanho()} ${larguraTotal ? 'w-100' : ''} ${className}`}
+      className={classes}
     >
       {children}
     </button>
