@@ -1,0 +1,41 @@
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+    animation: overlayIn 0.25s ease-out;
+}
+.btn-submit,
+.submit-button-RecoverEmailGet,
+.submit-button-VerifyCode {
+  transition: transform 0.15s ease, filter 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-submit:hover,
+.submit-button-RecoverEmailGet:hover,
+.submit-button-VerifyCode:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(247, 137, 52, 0.35);
+}
+
+.modal-box {
+  max-height: 90vh;
+  overflow: auto;
+  border-radius: 16px;
+   scrollbar-width: none;
+  -ms-overflow-style: none; 
+  animation: boxIn 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+}
+
+@keyframes overlayIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes boxIn {
+  from { opacity: 0; transform: translateY(16px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}

@@ -1,0 +1,307 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-principal);
+}
+
+.verify-container-VerifyCode {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.verify-card-VerifyCode {
+  background: var(--is-white);
+  width: 100%;
+  max-width: 480px;
+  padding: 40px;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--is-border);
+}
+
+.back-button-VerifyCode {
+  background-color: var(--is-green);
+  color: var(--is-white);
+  border: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  cursor: pointer;
+  margin-bottom: 24px;
+  transition: transform 0.2s ease, filter 0.2s ease;
+  text-decoration: none;
+}
+
+.back-button-VerifyCode:hover {
+  filter: brightness(0.9);
+  transform: scale(1.05);
+}
+
+.title-VerifyCode {
+  color: var(--is-orange);
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.subtitle-VerifyCode {
+  color: var(--is-text);
+  opacity: 0.8;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  margin-bottom: 32px;
+}
+
+.verify-form-VerifyCode {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.code-inputs-container-VerifyCode {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+
+.code-input-VerifyCode {
+  width: 100%;
+  height: 60px;
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--is-text);
+  background-color: var(--is-white);
+  border: 2px solid var(--is-border);
+  border-radius: 12px;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.code-input-VerifyCode:focus {
+  border-color: var(--is-green);
+  box-shadow: 0 0 0 3px rgba(0, 100, 90, 0.15);
+}
+
+.code-input-VerifyCode.filled {
+  border-color: var(--is-green);
+  color: var(--is-green);
+}
+
+.submit-button-VerifyCode {
+  width: 100%;
+  padding: 16px;
+  background-color: var(--is-orange);
+  color: var(--is-white);
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter 0.2s ease, transform 0.1s ease;
+}
+
+.submit-button-VerifyCode:hover {
+  filter: brightness(0.95);
+}
+
+.submit-button-VerifyCode:active {
+  transform: scale(0.99);
+}
+
+
+.resend-container-VerifyCode {
+  margin-top: 24px;
+  text-align: center;
+}
+
+.resend-container-VerifyCode p {
+  color: var(--is-text);
+  opacity: 0.8;
+  font-size: 0.9rem;
+  margin-bottom: 4px;
+}
+
+.resend-link-VerifyCode {
+  background: none;
+  border: none;
+  color: var(--is-green);
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  text-decoration: underline;
+  transition: opacity 0.2s ease;
+}
+
+.resend-link-VerifyCode:hover {
+  opacity: 0.8;
+}
+
+.animation-wrapper-VerifyCode {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+
+.code-inputs-container-VerifyCode {
+  display: flex;
+  gap: 10px;
+  transition: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+}
+
+.code-inputs-container-VerifyCode.success {
+  transform: scale(0);
+  opacity: 0;
+  gap: 0;
+}
+
+
+.code-inputs-container-VerifyCode.error {
+  animation: shake 0.4s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-8px); }
+  40%, 80% { transform: translateX(8px); }
+}
+
+
+.icon-badge-VerifyCode {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: popIn 0.4s ease-out forwards;
+}
+
+@keyframes popIn {
+  0% { transform: scale(0); opacity: 0; }
+  80% { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.checkmark {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: block;
+  stroke-width: 3;
+  stroke: #4caf50;
+  stroke-miterlimit: 10;
+  box-shadow: inset 0px 0px 0px #4caf50;
+}
+
+.checkmark-circle {
+  stroke-dasharray: 166;
+  stroke-dashoffset: 166;
+  stroke-width: 3;
+  stroke: #4caf50;
+  fill: none;
+  animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+}
+
+.checkmark-check {
+  transform-origin: 50% 50%;
+  stroke-dasharray: 48;
+  stroke-dashoffset: 48;
+  animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.4s forwards;
+}
+
+.crossmark {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: block;
+  stroke-width: 3;
+  stroke: #f44336;
+  stroke-miterlimit: 10;
+}
+
+.crossmark-circle {
+  stroke-dasharray: 166;
+  stroke-dashoffset: 166;
+  stroke-width: 3;
+  stroke: #f44336;
+  fill: none;
+  animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+}
+
+.crossmark-check {
+  transform-origin: 50% 50%;
+  stroke-dasharray: 48;
+  stroke-dashoffset: 48;
+  animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.4s forwards;
+}
+
+@keyframes stroke {
+  100% { stroke-dashoffset: 0; }
+}
+
+.error-message-VerifyCode {
+   color: #d32f2f;
+  font-size: 14px;
+  min-height: 20px;
+  margin-top: 0;
+}
+
+.code-inputs-container-VerifyCode.success,
+.code-inputs-container-VerifyCode.error {
+  transform: scale(0);
+  opacity: 0;
+  gap: 0;
+}
+
+.checkmark-circle,
+.checkmark-check,
+.crossmark-circle,
+.crossmark-check {
+  fill: none;
+}
+
+.resend-button-VerifyCode {
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: underline;
+  font-size: 14px;
+  color: inherit;
+  padding: 0;
+  margin-bottom: 8px;
+  color: var(--is-green);
+}
+
+.resend-button-VerifyCode:hover {
+  opacity: 0.8;
+}
+
+@media (max-width: 480px) {
+  .verify-container-VerifyCode {
+    padding: 0;
+    align-items: flex-start;
+    background-color: var(--is-white);
+  }
+
+  .verify-card-VerifyCode {
+    box-shadow: none;
+    border: none;
+    padding: 24px;
+  }
+
+  .code-input-VerifyCode {
+    height: 52px;
+    font-size: 1.25rem;
+  }
+}
