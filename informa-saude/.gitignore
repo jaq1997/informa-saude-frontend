@@ -34,3 +34,4 @@ jornadas-conteudos/
 src/assets/images/*.jpg
 src/assets/images/*.jpeg
 src/assets/images/*.png
+.env

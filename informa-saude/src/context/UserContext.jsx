@@ -1,4 +1,5 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
+import { buscarPerfil } from '../api/api';
 
 const UserContext = createContext();
 
@@ -31,6 +32,17 @@ export function UserProvider({ children }) {
     setJornadaRecomendada(jornadaKey);
     localStorage.setItem('informa-saude-jornada-destaque', jornadaKey);
   };
+
+  useEffect(() => {
+    if (!localStorage.getItem('token')) return;
+
+    buscarPerfil()
+      .then((perfil) => atualizarUsuario({ nome: perfil.nome, email: perfil.email }))
+      .catch(() => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('informa-saude-usuario-ativo');
+      });
+  }, []);
 
   return (
     <UserContext.Provider value={{ usuario, atualizarUsuario, jornadaRecomendada, atualizarJornada }}>

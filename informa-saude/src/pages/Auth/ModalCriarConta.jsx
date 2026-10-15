@@ -3,18 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { AuthModalLayout } from './AuthModalLayout';
 import { FormInput } from '../../components';
+import { cadastrar, entrar, buscarPerfil } from '../../api/api';
+import { useUser } from '../../context/UserContext';
 
 const OPCOES_SEXO = [
   { id: 'sexoFem', valor: 'Feminino' },
   { id: 'sexoMasc', valor: 'Masculino' },
   { id: 'sexoOutro', valor: 'Outro / Prefiro não informar' }
 ];
-
-const CHAVE_CONTAS_LOCAIS = 'informa-saude-contas';
-const CONTA_DEMONSTRACAO = {
-  email: 'joaodasilva@example.com',
-  telefone: '(51) 99999-9999'
-};
 
 const validarDataNascimento = (dataStr) => {
   if (!/^\d{2}\/\d{2}\/\d{4}$/.test(dataStr)) return false;
@@ -30,9 +26,13 @@ const validarDataNascimento = (dataStr) => {
   const diasNoMes = new Date(ano, mes, 0).getDate();
   return dia >= 1 && dia <= diasNoMes;
 };
+const converterDataParaApi = (dataStr) => {
+  const [dia, mes, ano] = dataStr.split('/');
+  return `${ano}-${mes}-${dia}`;
+};
 
 const validarRequisitosSenha = (senha) => {
-  const minCaracteres = senha.length >= 6;
+  const minCaracteres = senha.length >= 8 && senha.length <= 72;
   const temSimbolo = /[@#%*!$&&^\-_+=\[{\]:;'"<>,.?\/|\\]/.test(senha);
   const temMaiuscula = /[A-Z]/.test(senha);
   const temMinuscula = /[a-z]/.test(senha);
@@ -48,8 +48,15 @@ const validarRequisitosSenha = (senha) => {
   };
 };
 
+const mensagemDeErro = (err) =>
+  err.message === 'Failed to fetch'
+    ? 'Não foi possível conectar ao servidor. Tente novamente.'
+    : err.message;
+
 export function ModalCriarConta({ onClose, onAbrirLogin }) {
   const navigate = useNavigate();
+  const { atualizarUsuario } = useUser();
+
   const [etapaCadastro, setEtapaCadastro] = useState(1);
   const [dadosCadastro, setDadosCadastro] = useState({
     nome: '',
@@ -63,6 +70,7 @@ export function ModalCriarConta({ onClose, onAbrirLogin }) {
   const [erroEtapa1, setErroEtapa1] = useState('');
   const [erroEtapa2, setErroEtapa2] = useState('');
   const [feedback, setFeedback] = useState(null);
+  const [carregando, setCarregando] = useState(false);
 
   useEffect(() => {
     document.body.style.overflow = 'hidden';
@@ -81,7 +89,7 @@ export function ModalCriarConta({ onClose, onAbrirLogin }) {
     setEtapaCadastro(2);
   };
 
-  const handleFinalizarCadastro = (e) => {
+  const handleFinalizarCadastro = async (e) => {
     e.preventDefault();
     setErroEtapa2('');
 
@@ -96,31 +104,36 @@ export function ModalCriarConta({ onClose, onAbrirLogin }) {
       return;
     }
 
-    const contasSalvas = JSON.parse(localStorage.getItem(CHAVE_CONTAS_LOCAIS) || '[]');
-    const contas = contasSalvas.length > 0 ? contasSalvas : [CONTA_DEMONSTRACAO];
-    const emailInformado = dadosCadastro.email.trim().toLowerCase();
-    const telefoneInformado = dadosCadastro.telefone.trim();
-    const cadastroExistente = contas.some((conta) => (
-      conta.email.toLowerCase() === emailInformado
-      || conta.telefone === telefoneInformado
-    ));
+    const email = dadosCadastro.email.trim().toLowerCase();
+    setCarregando(true);
 
-    if (cadastroExistente) {
-      setFeedback('alerta');
+    try {
+      await cadastrar({
+        nome: dadosCadastro.nome.trim(),
+        email,
+        senha: dadosCadastro.senha,
+        sexo: dadosCadastro.sexo,
+        data_nascimento: converterDataParaApi(dadosCadastro.dataNascimento),
+        telefone: dadosCadastro.telefone.replace(/\D/g, '') || null
+      });
+    } catch (err) {
+      setCarregando(false);
+      if (err.status === 400) {
+        setFeedback('alerta'); // e-mail ou telefone já cadastrados
+      } else {
+        setErroEtapa2(mensagemDeErro(err));
+      }
       return;
     }
 
-    const novoUsuario = {
-      nome: dadosCadastro.nome,
-      email: emailInformado,
-      telefone: telefoneInformado
-    };
+    try {
+      await entrar(email, dadosCadastro.senha);
+      const perfil = await buscarPerfil();
+      atualizarUsuario({ nome: perfil.nome, email: perfil.email });
+    } catch {
+    }
 
-    localStorage.setItem(CHAVE_CONTAS_LOCAIS, JSON.stringify([
-      ...contas,
-      novoUsuario
-    ]));
-    localStorage.setItem('informa-saude-usuario-ativo', JSON.stringify(novoUsuario));
+    setCarregando(false);
     setFeedback('sucesso');
   };
 
@@ -134,13 +147,6 @@ export function ModalCriarConta({ onClose, onAbrirLogin }) {
     setDadosCadastro((dadosAtuais) => ({
       ...dadosAtuais,
       [campo]: valor
-    }));
-  };
-
-  const alternarVisibilidadeSenha = (campo) => {
-    setSenhasVisiveis((estadoAtual) => ({
-      ...estadoAtual,
-      [campo]: !estadoAtual[campo]
     }));
   };
 
@@ -205,6 +211,8 @@ export function ModalCriarConta({ onClose, onAbrirLogin }) {
     </button>
   ) : null;
 
+  const requisitos = validarRequisitosSenha(dadosCadastro.senha);
+
   return (
     <AuthModalLayout
       onClose={onClose}
@@ -212,7 +220,6 @@ export function ModalCriarConta({ onClose, onAbrirLogin }) {
       centralizarConteudo={etapaCadastro === 1}
       conteudoAntesDoTitulo={botaoVoltar}
     >
-
       {etapaCadastro === 1 ? (
         <form onSubmit={handleAvancarCadastroEtapa1}>
           {erroEtapa1 && (
@@ -319,16 +326,22 @@ export function ModalCriarConta({ onClose, onAbrirLogin }) {
           <div className="is-password-checklist my-2">
             <strong className="d-block mb-1 text-dark fs-6">Requisitos da senha:</strong>
             <ul className="mb-0 ps-3">
-              <li className={validarRequisitosSenha(dadosCadastro.senha).minCaracteres && validarRequisitosSenha(dadosCadastro.senha).temSimbolo ? 'text-success fw-bold' : ''}>
-                Mínimo 6 caracteres | 1 símbolo (@#%*)
+              <li className={requisitos.minCaracteres && requisitos.temSimbolo ? 'text-success fw-bold' : ''}>
+                Mínimo 8 caracteres | 1 símbolo (@#%*)
               </li>
-              <li className={validarRequisitosSenha(dadosCadastro.senha).temMaiuscula && validarRequisitosSenha(dadosCadastro.senha).temMinuscula && validarRequisitosSenha(dadosCadastro.senha).temNumero ? 'text-success fw-bold' : ''}>
+              <li className={requisitos.temMaiuscula && requisitos.temMinuscula && requisitos.temNumero ? 'text-success fw-bold' : ''}>
                 Uma letra maiúscula, uma minúscula e um número
               </li>
             </ul>
           </div>
 
-          <button type="submit" className="is-btn is-btn--orange w-100 fs-6 py-2 mt-3">Finalizar Cadastro</button>
+          <button
+            type="submit"
+            className="is-btn is-btn--orange w-100 fs-6 py-2 mt-3"
+            disabled={carregando}
+          >
+            {carregando ? 'Criando conta...' : 'Finalizar Cadastro'}
+          </button>
         </form>
       )}
 
