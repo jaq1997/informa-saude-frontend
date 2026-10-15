@@ -1,14 +1,33 @@
-import React, { useState, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import './Codeverify.css'
-import { verificarCodigoTeste } from '../test/code'
+import { pedirCodigo, verificarCodigo } from '../../../api/api'
+
+const TAMANHO_CODIGO = 6
+const ESPERA_REENVIO = 60
+
+const codigoVazio = () => Array(TAMANHO_CODIGO).fill('')
+
+const mensagemDeErro = (err) =>
+  err.message === 'Failed to fetch'
+    ? 'Não foi possível conectar ao servidor. Tente novamente.'
+    : err.message
 
 export function VerifyCode({ email, onSuccess, onClose, onBack }) {
-  const [code, setCode] = useState(['', '', '', '', ''])
+  const [code, setCode] = useState(codigoVazio())
   const [errorMessage, setErrorMessage] = useState('')
   const [status, setStatus] = useState('idle')
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [verificando, setVerificando] = useState(false)
+  const [reenviando, setReenviando] = useState(false)
+  const [espera, setEspera] = useState(ESPERA_REENVIO)
 
-  const inputRefs = [useRef(null), useRef(null), useRef(null), useRef(null), useRef(null)]
+  const inputRefs = useRef([])
+
+  useEffect(() => {
+    if (espera <= 0) return
+    const id = setTimeout(() => setEspera((s) => s - 1), 1000)
+    return () => clearTimeout(id)
+  }, [espera])
 
   const handleChange = (index, value) => {
     if (!/^\d*$/.test(value)) return
@@ -20,64 +39,84 @@ export function VerifyCode({ email, onSuccess, onClose, onBack }) {
     newCode[index] = value.slice(-1)
     setCode(newCode)
 
-    if (value && index < 4) {
-      inputRefs[index + 1].current?.focus()
+    if (value && index < TAMANHO_CODIGO - 1) {
+      inputRefs.current[index + 1]?.focus()
     }
   }
 
   const handleKeyDown = (index, e) => {
     if (e.key === 'Backspace' && !code[index] && index > 0) {
-      inputRefs[index - 1].current?.focus()
+      inputRefs.current[index - 1]?.focus()
     }
   }
 
   const handlePaste = (e) => {
     e.preventDefault()
-    const pastedData = e.clipboardData.getData('text').slice(0, 5).replace(/\D/g, '')
-    const newCode = [...code]
+    const pastedData = e.clipboardData
+      .getData('text')
+      .replace(/\D/g, '')
+      .slice(0, TAMANHO_CODIGO)
 
+    const newCode = codigoVazio()
     for (let i = 0; i < pastedData.length; i++) {
       newCode[i] = pastedData[i]
     }
     setCode(newCode)
 
-    const nextFocus = Math.min(pastedData.length, 4)
-    inputRefs[nextFocus].current?.focus()
+    const nextFocus = Math.min(pastedData.length, TAMANHO_CODIGO - 1)
+    inputRefs.current[nextFocus]?.focus()
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     e.stopPropagation()
     const fullCode = code.join('')
 
-    if (fullCode.length < 5) {
-      setErrorMessage('Preencha os 5 dígitos do código.')
+    if (fullCode.length < TAMANHO_CODIGO) {
+      setErrorMessage(`Preencha os ${TAMANHO_CODIGO} dígitos do código.`)
       return
     }
 
-    const ehValido = verificarCodigoTeste(fullCode)
-
-    if (ehValido) {
+    setVerificando(true)
+    try {
+      const { reset_token } = await verificarCodigo(email, fullCode)
       setErrorMessage('')
       setStatus('success')
 
       setTimeout(() => {
-        onSuccess()
+        onSuccess(reset_token)
       }, 1800)
-    } else {
-      setErrorMessage('Código incorreto! Tente novamente.')
+    } catch (err) {
+      setErrorMessage(mensagemDeErro(err))
       setStatus('error')
 
       setTimeout(() => {
-        setCode(['', '', '', '', ''])
+        setCode(codigoVazio())
         setStatus('idle')
-        inputRefs[0].current?.focus()
+        inputRefs.current[0]?.focus()
       }, 1200)
+    } finally {
+      setVerificando(false)
     }
   }
 
-  const handleResendCode = () => {
-    setIsModalOpen(true)
+  const handleResendCode = async () => {
+    if (espera > 0 || reenviando) return
+
+    setReenviando(true)
+    setErrorMessage('')
+    try {
+      await pedirCodigo(email)
+      setCode(codigoVazio())
+      setStatus('idle')
+      setEspera(ESPERA_REENVIO)
+      setIsModalOpen(true)
+      inputRefs.current[0]?.focus()
+    } catch (err) {
+      setErrorMessage(mensagemDeErro(err))
+    } finally {
+      setReenviando(false)
+    }
   }
 
   return (
@@ -85,12 +124,13 @@ export function VerifyCode({ email, onSuccess, onClose, onBack }) {
       <div className="verify-card-VerifyCode">
 
         <button type="button" className="back-button-VerifyCode" onClick={onBack}>
-  &#10094;
-</button>
+          &#10094;
+        </button>
 
         <h1 className="title-VerifyCode">Digite seu código</h1>
         <p className="subtitle-VerifyCode">
-          Digite o código de 5 dígitos enviado no e-mail.
+          Digite o código de {TAMANHO_CODIGO} dígitos enviado no e-mail.
+          Se não encontrar, olhe também a caixa de spam.
         </p>
 
         <form onSubmit={handleSubmit} className="verify-form-VerifyCode">
@@ -104,7 +144,7 @@ export function VerifyCode({ email, onSuccess, onClose, onBack }) {
                   inputMode="numeric"
                   maxLength={1}
                   value={digit}
-                  ref={inputRefs[index]}
+                  ref={(el) => (inputRefs.current[index] = el)}
                   onChange={(e) => handleChange(index, e.target.value)}
                   onKeyDown={(e) => handleKeyDown(index, e)}
                   onPaste={handlePaste}
@@ -133,12 +173,16 @@ export function VerifyCode({ email, onSuccess, onClose, onBack }) {
 
           </div>
 
-        <p className="error-message-VerifyCode">
-  {errorMessage}
-</p>
+          <p className="error-message-VerifyCode">
+            {errorMessage}
+          </p>
 
-          <button type="submit" className="submit-button-VerifyCode">
-            Verificar código
+          <button
+            type="submit"
+            className="submit-button-VerifyCode"
+            disabled={verificando || status === 'success'}
+          >
+            {verificando ? 'Verificando...' : 'Verificar código'}
           </button>
         </form>
 
@@ -148,8 +192,13 @@ export function VerifyCode({ email, onSuccess, onClose, onBack }) {
             type="button"
             className="resend-button-VerifyCode"
             onClick={handleResendCode}
+            disabled={espera > 0 || reenviando}
           >
-            Reenviar código
+            {reenviando
+              ? 'Enviando...'
+              : espera > 0
+                ? `Reenviar código (${espera}s)`
+                : 'Reenviar código'}
           </button>
           <br />
           <button type="button" className="resend-link-VerifyCode" onClick={onBack}>

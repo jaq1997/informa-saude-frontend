@@ -3,6 +3,8 @@ import { buscarPerfil } from '../api/api';
 
 const UserContext = createContext();
 
+const USUARIO_VAZIO = { nome: '', email: '' };
+
 export function UserProvider({ children }) {
   const [usuario, setUsuario] = useState(() => {
     const usuarioSalvo = localStorage.getItem('informa-saude-usuario-ativo');
@@ -10,10 +12,10 @@ export function UserProvider({ children }) {
       try {
         return JSON.parse(usuarioSalvo);
       } catch {
-        return { nome: usuarioSalvo, email: 'joaodasilva@example.com' };
+        return { nome: usuarioSalvo, email: '' };
       }
     }
-    return { nome: 'João da Silva', email: 'joaodasilva@example.com' };
+    return USUARIO_VAZIO;
   });
 
   const [jornadaRecomendada, setJornadaRecomendada] = useState(() => {
@@ -28,6 +30,12 @@ export function UserProvider({ children }) {
     });
   };
 
+  const sair = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('informa-saude-usuario-ativo');
+    setUsuario(USUARIO_VAZIO);
+  };
+
   const atualizarJornada = (jornadaKey) => {
     setJornadaRecomendada(jornadaKey);
     localStorage.setItem('informa-saude-jornada-destaque', jornadaKey);
@@ -38,14 +46,13 @@ export function UserProvider({ children }) {
 
     buscarPerfil()
       .then((perfil) => atualizarUsuario({ nome: perfil.nome, email: perfil.email }))
-      .catch(() => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('informa-saude-usuario-ativo');
-      });
+      .catch(() => sair()); // token expirado ou inválido: limpa a sessão
   }, []);
 
   return (
-    <UserContext.Provider value={{ usuario, atualizarUsuario, jornadaRecomendada, atualizarJornada }}>
+    <UserContext.Provider
+      value={{ usuario, atualizarUsuario, sair, jornadaRecomendada, atualizarJornada }}
+    >
       {children}
     </UserContext.Provider>
   );

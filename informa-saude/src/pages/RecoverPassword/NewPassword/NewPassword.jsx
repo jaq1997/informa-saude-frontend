@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import './NewPassword.css'
+import { definirNovaSenha } from '../../../api/api'
 
 function EyeIcon({ open }) {
   if (open) {
@@ -21,27 +22,29 @@ function EyeIcon({ open }) {
   )
 }
 
-function ResetPassword({ onSuccess, onClose, onBack }) {
+const isStrongPassword = (password) =>
+  password.length >= 8 &&
+  password.length <= 72 &&
+  /[@#%*]/.test(password) &&
+  /[A-Z]/.test(password) &&
+  /[a-z]/.test(password) &&
+  /\d/.test(password)
+
+function ResetPassword({ resetToken, onSuccess, onClose, onBack }) {
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [showNewPassword, setShowNewPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false)
+  const [carregando, setCarregando] = useState(false)
 
-  const isStrongPassword = (password) =>
-    password.length >= 6 &&
-    /[@#%*]/.test(password) &&
-    /[A-Z]/.test(password) &&
-    /[a-z]/.test(password) &&
-    /\d/.test(password)
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     e.stopPropagation()
 
     if (!isStrongPassword(newPassword)) {
-      setErrorMessage('A senha precisa ter no mínimo 6 caracteres, 1 símbolo (@#%*), uma letra maiúscula, uma minúscula e um número.')
+      setErrorMessage('A senha precisa ter de 8 a 72 caracteres, 1 símbolo (@#%*), uma letra maiúscula, uma minúscula e um número.')
       return
     }
 
@@ -51,7 +54,22 @@ function ResetPassword({ onSuccess, onClose, onBack }) {
     }
 
     setErrorMessage('')
-    setIsSuccessModalOpen(true)
+    setCarregando(true)
+
+    try {
+      await definirNovaSenha(resetToken, newPassword)
+      setIsSuccessModalOpen(true)
+    } catch (err) {
+      setErrorMessage(
+        err.message === 'Failed to fetch'
+          ? 'Não foi possível conectar ao servidor. Tente novamente.'
+          : err.status === 400
+            ? 'Sua sessão de recuperação expirou. Volte e peça um novo código.'
+            : err.message
+      )
+    } finally {
+      setCarregando(false)
+    }
   }
 
   const handleModalContinue = () => {
@@ -125,8 +143,8 @@ function ResetPassword({ onSuccess, onClose, onBack }) {
           </p>
         )}
 
-        <button type="submit" className="btn-submit">
-          Alterar senha
+        <button type="submit" className="btn-submit" disabled={carregando}>
+          {carregando ? 'Alterando...' : 'Alterar senha'}
         </button>
       </form>
 

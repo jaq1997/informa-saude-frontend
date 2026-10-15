@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useUser } from '../../context/UserContext';
 import { User, Settings, KeyRound, LogOut } from 'lucide-react';
 import fotoPerfilInicial from '../../assets/images/foto-perfil.webp';
 import {
@@ -11,12 +12,12 @@ import {
   ModalAlterarSenha,
   ModalConfirmacao
 } from '../../components';
-import { obterNomeUsuario, obterEmailUsuario } from '../../utils/usuario';
 
 export function MeuPerfil() {
   const navigate = useNavigate();
-  const nomeUsuario = obterNomeUsuario();
-  const emailUsuario = obterEmailUsuario();
+  const { usuario, sair } = useUser();
+  const nomeUsuario = usuario.nome;
+  const emailUsuario = usuario.email;
   const [modalSair, setModalSair] = useState(false);
   const [modalSenha, setModalSenha] = useState(false);
   const [foto, setFoto] = useState(() => {
@@ -24,6 +25,8 @@ export function MeuPerfil() {
     if (fotoSalva === 'null') return null;
     return fotoSalva || fotoPerfilInicial;
   });
+
+  
   const [toastMsg, setToastMsg] = useState(null);
 
   const atualizarFotoPerfil = (novaFoto) => {
@@ -37,9 +40,10 @@ export function MeuPerfil() {
   };
 
   const handleConfirmarSair = () => {
-    setModalSair(false);
-    navigate('/');
-  };
+  setModalSair(false);
+  sair();
+  navigate('/');
+};
 
   return (
     <div className="bg-light min-vh-100 pb-5">

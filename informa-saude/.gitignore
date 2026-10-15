@@ -34,4 +34,6 @@ jornadas-conteudos/
 src/assets/images/*.jpg
 src/assets/images/*.jpeg
 src/assets/images/*.png
+
+# Arquivos de configuração de ambiente
 .env
