@@ -46,7 +46,7 @@ export function UserProvider({ children }) {
 
     buscarPerfil()
       .then((perfil) => atualizarUsuario({ nome: perfil.nome, email: perfil.email }))
-      .catch(() => sair()); // token expirado ou inválido: limpa a sessão
+      .catch(() => sair()); 
   }, []);
 
   return (

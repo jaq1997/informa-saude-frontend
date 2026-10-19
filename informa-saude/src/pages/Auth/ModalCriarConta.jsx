@@ -119,7 +119,7 @@ export function ModalCriarConta({ onClose, onAbrirLogin }) {
     } catch (err) {
       setCarregando(false);
       if (err.status === 400) {
-        setFeedback('alerta'); // e-mail ou telefone já cadastrados
+        setFeedback('alerta'); 
       } else {
         setErroEtapa2(mensagemDeErro(err));
       }
