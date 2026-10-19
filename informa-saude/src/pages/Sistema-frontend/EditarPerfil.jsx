@@ -1,34 +1,56 @@
 import { useEffect, useState } from 'react';
-import fotoPerfil from '../../assets/images/foto-perfil.webp';
 import { SystemNavbar, ToastFeedback, FormInput, TituloPaginaSistema, CardPerfilSidebar } from '../../components';
+import { useUser } from '../../context/UserContext';
+import { obterNomeUsuario, obterEmailUsuario, resolverFoto } from '../../utils/usuario';
 
 export function EditarPerfil() {
+  const { usuario } = useUser();
+
+  const nomeAtual = usuario?.nome || obterNomeUsuario();
+  const emailAtual = usuario?.email || obterEmailUsuario();
+
   const dadosIniciais = {
-    nome: 'João da Silva',
-    email: 'joaodasilva@example.com',
+    nome: nomeAtual,
+    email: emailAtual,
     telefone: '(51) 9 9999 - 9999',
     dataNascimento: '23/03/1954',
   };
-  const [nome, setNome] = useState('João da Silva');
-  const [email, setEmail] = useState('joaodasilva@example.com');
-  const [telefone, setTelefone] = useState('(51) 9 9999 - 9999');
-  const [dataNascimento, setDataNascimento] = useState('23/03/1954');
+
+  const [nome, setNome] = useState(nomeAtual);
+  const [email, setEmail] = useState(emailAtual);
+  const [telefone, setTelefone] = useState(dadosIniciais.telefone);
+  const [dataNascimento, setDataNascimento] = useState(dadosIniciais.dataNascimento);
   const [modoEdicao, setModoEdicao] = useState(false);
   const [toastSucesso, setToastSucesso] = useState(false);
   const [toastFotoMsg, setToastFotoMsg] = useState(null);
-  const [foto, setFoto] = useState(() => {
-    const fotoSalva = localStorage.getItem('informa-saude-foto-perfil');
-    if (fotoSalva === 'null') return null;
-    return fotoSalva || fotoPerfil;
-  });
+  const [foto, setFoto] = useState(() => resolverFoto(usuario?.avatar_url));
+
+  useEffect(() => {
+    if (modoEdicao) return;
+    setNome(nomeAtual);
+    setEmail(emailAtual);
+  }, [nomeAtual, emailAtual]);
+
+  useEffect(() => {
+    const atualizarFoto = () => setFoto(resolverFoto(usuario?.avatar_url));
+
+    window.addEventListener('storage', atualizarFoto);
+    window.addEventListener('foto-perfil-atualizada', atualizarFoto);
+    atualizarFoto();
+
+    return () => {
+      window.removeEventListener('storage', atualizarFoto);
+      window.removeEventListener('foto-perfil-atualizada', atualizarFoto);
+    };
+  }, [usuario?.avatar_url]);
 
   const atualizarFotoPerfil = (novaFoto) => {
-    setFoto(novaFoto);
     if (novaFoto) {
       localStorage.setItem('informa-saude-foto-perfil', novaFoto);
     } else {
       localStorage.setItem('informa-saude-foto-perfil', 'null');
     }
+    setFoto(novaFoto);
     window.dispatchEvent(new Event('foto-perfil-atualizada'));
   };
 

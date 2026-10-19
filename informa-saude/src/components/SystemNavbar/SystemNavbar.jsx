@@ -6,28 +6,24 @@ import { BarraAcessibilidade } from '../BarraAcessibilidade/BarraAcessibilidade'
 import { AvatarUsuario } from '../AvatarUsuario/AvatarUsuario';
 import { Logo } from '../Logo/Logo';
 import { obterNomeUsuario } from '../../utils/usuario';
+import { useUser } from '../../context/UserContext';
+
+const resolverFoto = (avatarGoogle) => {
+  const fotoSalva = localStorage.getItem('informa-saude-foto-perfil');
+  if (fotoSalva === 'null') return null;
+  if (fotoSalva) return fotoSalva;
+  return avatarGoogle || fotoPerfil;
+};
 
 export function SystemNavbar() {
   const navigate = useNavigate();
+  const { usuario } = useUser();
   const nomeUsuario = obterNomeUsuario();
   const [modalSair, setModalSair] = useState(false);
-  const [fotoNavbar, setFotoNavbar] = useState(() => {
-    const fotoSalva = localStorage.getItem('informa-saude-foto-perfil');
-    if (fotoSalva === 'null') return null;
-    return fotoSalva || fotoPerfil;
-  });
+  const [fotoNavbar, setFotoNavbar] = useState(() => resolverFoto(usuario?.avatar_url));
 
   useEffect(() => {
-    const atualizarFoto = () => {
-      const fotoSalva = localStorage.getItem('informa-saude-foto-perfil');
-      if (fotoSalva === 'null') {
-        setFotoNavbar(null);
-      } else if (fotoSalva) {
-        setFotoNavbar(fotoSalva);
-      } else {
-        setFotoNavbar(fotoPerfil);
-      }
-    };
+    const atualizarFoto = () => setFotoNavbar(resolverFoto(usuario?.avatar_url));
 
     window.addEventListener('storage', atualizarFoto);
     window.addEventListener('foto-perfil-atualizada', atualizarFoto);
@@ -37,7 +33,7 @@ export function SystemNavbar() {
       window.removeEventListener('storage', atualizarFoto);
       window.removeEventListener('foto-perfil-atualizada', atualizarFoto);
     };
-  }, []);
+  }, [usuario?.avatar_url]);
 
   const confirmarSaida = () => {
     setModalSair(false);

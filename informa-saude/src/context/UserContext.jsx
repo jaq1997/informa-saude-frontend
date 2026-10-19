@@ -3,7 +3,7 @@ import { buscarPerfil } from '../api/api';
 
 const UserContext = createContext();
 
-const USUARIO_VAZIO = { nome: '', email: '' };
+const USUARIO_VAZIO = { nome: '', email: '', avatar_url: null };
 
 export function UserProvider({ children }) {
   const [usuario, setUsuario] = useState(() => {
@@ -12,7 +12,7 @@ export function UserProvider({ children }) {
       try {
         return JSON.parse(usuarioSalvo);
       } catch {
-        return { nome: usuarioSalvo, email: '' };
+        return { nome: usuarioSalvo, email: '', avatar_url: null };
       }
     }
     return USUARIO_VAZIO;
@@ -33,7 +33,9 @@ export function UserProvider({ children }) {
   const sair = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('informa-saude-usuario-ativo');
+    localStorage.removeItem('informa-saude-foto-perfil');
     setUsuario(USUARIO_VAZIO);
+    window.dispatchEvent(new Event('foto-perfil-atualizada'));
   };
 
   const atualizarJornada = (jornadaKey) => {
@@ -41,17 +43,43 @@ export function UserProvider({ children }) {
     localStorage.setItem('informa-saude-jornada-destaque', jornadaKey);
   };
 
+  const carregarPerfil = () =>
+    buscarPerfil()
+      .then((perfil) => {
+        const salvo = localStorage.getItem('informa-saude-usuario-ativo');
+        let anterior = null;
+        try {
+          anterior = salvo ? JSON.parse(salvo) : null;
+        } catch {
+          anterior = null;
+        }
+        if (anterior?.email && anterior.email !== perfil.email) {
+          localStorage.removeItem('informa-saude-foto-perfil');
+          window.dispatchEvent(new Event('foto-perfil-atualizada'));
+        }
+        atualizarUsuario({
+          nome: perfil.nome,
+          email: perfil.email,
+          avatar_url: perfil.avatar_url,
+        });
+      })
+      .catch(() => sair());
+
   useEffect(() => {
     if (!localStorage.getItem('token')) return;
-
-    buscarPerfil()
-      .then((perfil) => atualizarUsuario({ nome: perfil.nome, email: perfil.email }))
-      .catch(() => sair()); 
+    carregarPerfil();
   }, []);
 
   return (
     <UserContext.Provider
-      value={{ usuario, atualizarUsuario, sair, jornadaRecomendada, atualizarJornada }}
+      value={{
+        usuario,
+        atualizarUsuario,
+        carregarPerfil,
+        sair,
+        jornadaRecomendada,
+        atualizarJornada,
+      }}
     >
       {children}
     </UserContext.Provider>

@@ -1,19 +1,22 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { Camera, Trash2 } from 'lucide-react';
 import { BotaoSistema } from '../Botao/BotaoSistema';
-
 
 export function AvatarUsuario({
   nome = 'Usuário',
   src = null,
-  tamanho = 'lg', 
+  tamanho = 'lg',
   podeEditar = false,
   onAlterarFoto,
   onRemoverFoto
 }) {
   const inputArquivoRef = useRef(null);
+  const [erroImagem, setErroImagem] = useState(false);
 
-  
+  useEffect(() => {
+    setErroImagem(false);
+  }, [src]);
+
   const obterIniciais = (nomeCompleto) => {
     if (!nomeCompleto) return 'US';
     const partes = nomeCompleto.trim().split(/\s+/);
@@ -40,6 +43,8 @@ export function AvatarUsuario({
     }
   };
 
+  const mostrarFoto = src && !erroImagem;
+
   return (
     <div className={`d-inline-flex flex-column align-items-center ${podeEditar ? 'w-100' : ''}`}>
       <input
@@ -50,22 +55,22 @@ export function AvatarUsuario({
         className="d-none"
       />
 
-      
       <div
-        className={`is-avatar-circle is-avatar-${tamanho} ${src ? 'has-photo' : ''} rounded-circle d-flex align-items-center justify-content-center overflow-hidden shadow-sm ${podeEditar ? 'mb-3' : 'mb-0'}`}
+        className={`is-avatar-circle is-avatar-${tamanho} ${mostrarFoto ? 'has-photo' : ''} rounded-circle d-flex align-items-center justify-content-center overflow-hidden shadow-sm ${podeEditar ? 'mb-3' : 'mb-0'}`}
       >
-        {src ? (
+        {mostrarFoto ? (
           <img
             src={src}
             alt={nome}
-            className="w-100 h-100 object-fit-cover"
+            referrerPolicy="no-referrer"
+            onError={() => setErroImagem(true)}
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
           />
         ) : (
           <span>{obterIniciais(nome)}</span>
         )}
       </div>
 
-      
       {podeEditar && (
         <div className="d-flex flex-column align-items-center gap-2 w-100 mt-1">
           <BotaoSistema

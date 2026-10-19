@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Bell, Trash2 } from 'lucide-react';
-import fotoPerfilInicial from '../../assets/images/foto-perfil.webp';
 import {
   SystemNavbar,
   TituloPaginaSistema,
@@ -9,37 +8,29 @@ import {
   ModalConfirmacao,
   ToastFeedback
 } from '../../components';
+import { useUser } from '../../context/UserContext';
+import { obterNomeUsuario, obterEmailUsuario, resolverFoto } from '../../utils/usuario';
 
 export function Configuracoes() {
   const navigate = useNavigate();
+  const { usuario } = useUser();
   const [modalDeletar, setModalDeletar] = useState(false);
   const [notificacoesAtivas, setNotificacoesAtivas] = useState(true);
   const [toastConfig, setToastConfig] = useState(null);
-  const [foto, setFoto] = useState(() => {
-    const fotoSalva = localStorage.getItem('informa-saude-foto-perfil');
-    if (fotoSalva === 'null') return null;
-    return fotoSalva || fotoPerfilInicial;
-  });
+  const [foto, setFoto] = useState(() => resolverFoto(usuario?.avatar_url));
 
   useEffect(() => {
-    const atualizarFoto = () => {
-      const fotoSalva = localStorage.getItem('informa-saude-foto-perfil');
-      if (fotoSalva === 'null') {
-        setFoto(null);
-      } else if (fotoSalva) {
-        setFoto(fotoSalva);
-      } else {
-        setFoto(fotoPerfilInicial);
-      }
-    };
+    const atualizarFoto = () => setFoto(resolverFoto(usuario?.avatar_url));
 
     window.addEventListener('storage', atualizarFoto);
     window.addEventListener('foto-perfil-atualizada', atualizarFoto);
+    atualizarFoto();
+
     return () => {
       window.removeEventListener('storage', atualizarFoto);
       window.removeEventListener('foto-perfil-atualizada', atualizarFoto);
     };
-  }, []);
+  }, [usuario?.avatar_url]);
 
   const handleDeletarConta = () => {
     setModalDeletar(false);
@@ -69,8 +60,8 @@ export function Configuracoes() {
         <div className="row g-4">
           <div className="col-12 col-lg-4">
             <CardPerfilSidebar
-              nome="João Da Silva"
-              email="joaodasilva@example.com"
+              nome={usuario?.nome || obterNomeUsuario()}
+              email={usuario?.email || obterEmailUsuario()}
               foto={foto}
               podeEditar={false}
             />

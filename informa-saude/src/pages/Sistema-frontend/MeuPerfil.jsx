@@ -1,8 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../../context/UserContext';
 import { User, Settings, KeyRound, LogOut } from 'lucide-react';
-import fotoPerfilInicial from '../../assets/images/foto-perfil.webp';
 import {
   SystemNavbar,
   ItemMeuPerfil,
@@ -12,6 +11,7 @@ import {
   ModalAlterarSenha,
   ModalConfirmacao
 } from '../../components';
+import { resolverFoto } from '../../utils/usuario';
 
 export function MeuPerfil() {
   const navigate = useNavigate();
@@ -20,30 +20,37 @@ export function MeuPerfil() {
   const emailUsuario = usuario.email;
   const [modalSair, setModalSair] = useState(false);
   const [modalSenha, setModalSenha] = useState(false);
-  const [foto, setFoto] = useState(() => {
-    const fotoSalva = localStorage.getItem('informa-saude-foto-perfil');
-    if (fotoSalva === 'null') return null;
-    return fotoSalva || fotoPerfilInicial;
-  });
-
-  
+  const [foto, setFoto] = useState(() => resolverFoto(usuario?.avatar_url));
   const [toastMsg, setToastMsg] = useState(null);
 
+  useEffect(() => {
+    const atualizarFoto = () => setFoto(resolverFoto(usuario?.avatar_url));
+
+    window.addEventListener('storage', atualizarFoto);
+    window.addEventListener('foto-perfil-atualizada', atualizarFoto);
+    atualizarFoto();
+
+    return () => {
+      window.removeEventListener('storage', atualizarFoto);
+      window.removeEventListener('foto-perfil-atualizada', atualizarFoto);
+    };
+  }, [usuario?.avatar_url]);
+
   const atualizarFotoPerfil = (novaFoto) => {
-    setFoto(novaFoto);
     if (novaFoto) {
       localStorage.setItem('informa-saude-foto-perfil', novaFoto);
     } else {
       localStorage.setItem('informa-saude-foto-perfil', 'null');
     }
+    setFoto(novaFoto);
     window.dispatchEvent(new Event('foto-perfil-atualizada'));
   };
 
   const handleConfirmarSair = () => {
-  setModalSair(false);
-  sair();
-  navigate('/');
-};
+    setModalSair(false);
+    sair();
+    navigate('/');
+  };
 
   return (
     <div className="bg-light min-vh-100 pb-5">
