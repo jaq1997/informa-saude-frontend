@@ -3,8 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { AuthModalLayout } from './AuthModalLayout';
 import { FormInput } from '../../components';
-import { cadastrar, entrar, buscarPerfil } from '../../api/api';
+import {
+  cadastrar,
+  entrar,
+  buscarPerfil,
+  verificarEmail,
+  reenviarCodigoCadastro
+} from '../../api/api';
 import { useUser } from '../../context/UserContext';
+import VerifyCode from '../RecoverPassword/Codeverify/Codeverify';
 
 const OPCOES_SEXO = [
   { id: 'sexoFem', valor: 'Feminino' },
@@ -71,6 +78,8 @@ export function ModalCriarConta({ onClose, onAbrirLogin }) {
   const [erroEtapa2, setErroEtapa2] = useState('');
   const [feedback, setFeedback] = useState(null);
   const [carregando, setCarregando] = useState(false);
+  const [verificandoEmail, setVerificandoEmail] = useState(false);
+  const [emailPendente, setEmailPendente] = useState('');
 
   useEffect(() => {
     document.body.style.overflow = 'hidden';
@@ -119,22 +128,33 @@ export function ModalCriarConta({ onClose, onAbrirLogin }) {
     } catch (err) {
       setCarregando(false);
       if (err.status === 400) {
-        setFeedback('alerta'); 
+        setFeedback('alerta');
       } else {
         setErroEtapa2(mensagemDeErro(err));
       }
       return;
     }
 
+    setCarregando(false);
+    setEmailPendente(email);
+    setVerificandoEmail(true);
+  };
+
+  const handleEmailVerificado = async () => {
     try {
-      await entrar(email, dadosCadastro.senha);
+      await entrar(emailPendente, dadosCadastro.senha);
       const perfil = await buscarPerfil();
       atualizarUsuario({ nome: perfil.nome, email: perfil.email });
     } catch {
     }
 
-    setCarregando(false);
+    setVerificandoEmail(false);
     setFeedback('sucesso');
+  };
+
+  const handleVoltarDaVerificacao = () => {
+    setVerificandoEmail(false);
+    setEtapaCadastro(2);
   };
 
   const handleIrParaPerfil = () => {
@@ -163,6 +183,22 @@ export function ModalCriarConta({ onClose, onAbrirLogin }) {
     if (valorFormatado.length > 7) valorFormatado = valorFormatado.replace(/^\((\d{2})\)\s(\d{5})/, '($1) $2-');
     return valorFormatado;
   };
+
+  if (verificandoEmail) {
+    return (
+      <AuthModalLayout onClose={onClose} centralizarConteudo>
+        <VerifyCode
+          embutido
+          email={emailPendente}
+          verificar={verificarEmail}
+          reenviar={reenviarCodigoCadastro}
+          onSuccess={handleEmailVerificado}
+          onClose={onClose}
+          onBack={handleVoltarDaVerificacao}
+        />
+      </AuthModalLayout>
+    );
+  }
 
   if (feedback === 'sucesso') {
     return (

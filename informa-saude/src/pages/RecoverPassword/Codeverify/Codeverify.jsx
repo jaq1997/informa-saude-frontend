@@ -12,7 +12,20 @@ const mensagemDeErro = (err) =>
     ? 'Não foi possível conectar ao servidor. Tente novamente.'
     : err.message
 
-export function VerifyCode({ email, onSuccess, onClose, onBack }) {
+const verificarRecuperacao = async (email, codigo) => {
+  const { reset_token } = await verificarCodigo(email, codigo)
+  return reset_token
+}
+
+export function VerifyCode({
+  email,
+  onSuccess,
+  onClose,
+  onBack,
+  verificar = verificarRecuperacao,
+  reenviar = pedirCodigo,
+  embutido = false,
+}) {
   const [code, setCode] = useState(codigoVazio())
   const [errorMessage, setErrorMessage] = useState('')
   const [status, setStatus] = useState('idle')
@@ -79,12 +92,12 @@ export function VerifyCode({ email, onSuccess, onClose, onBack }) {
 
     setVerificando(true)
     try {
-      const { reset_token } = await verificarCodigo(email, fullCode)
+      const resultado = await verificar(email, fullCode)
       setErrorMessage('')
       setStatus('success')
 
       setTimeout(() => {
-        onSuccess(reset_token)
+        onSuccess(resultado)
       }, 1800)
     } catch (err) {
       setErrorMessage(mensagemDeErro(err))
@@ -106,7 +119,7 @@ export function VerifyCode({ email, onSuccess, onClose, onBack }) {
     setReenviando(true)
     setErrorMessage('')
     try {
-      await pedirCodigo(email)
+      await reenviar(email)
       setCode(codigoVazio())
       setStatus('idle')
       setEspera(ESPERA_REENVIO)
@@ -121,7 +134,7 @@ export function VerifyCode({ email, onSuccess, onClose, onBack }) {
 
   return (
     <div className="verify-container-VerifyCode">
-      <div className="verify-card-VerifyCode">
+      <div className={`verify-card-VerifyCode${embutido ? ' embutido' : ''}`}>
 
         <button type="button" className="back-button-VerifyCode" onClick={onBack}>
           &#10094;

@@ -27,6 +27,12 @@ async function chamar(rota, corpo, { auth = false } = {}) {
 
 export const cadastrar = (dados) => chamar("/register", dados);
 
+export const verificarEmail = (email, codigo) =>
+  chamar("/register/verificar", { email, codigo });
+
+export const reenviarCodigoCadastro = (email) =>
+  chamar("/register/reenviar", { email });
+
 export async function entrar(email, senha) {
   const dados = await chamar("/login", { email, senha });
   localStorage.setItem("token", dados.access_token);
