@@ -38,4 +38,17 @@
 
   --is-margin-desktop: 100px;
   --is-margin-mobile: 20px;
+  
+  --is-surface: #FFFFFF;
+  --is-surface-soft: #FFFCF9;
+  --is-border-soft: #E7DDD2;
+  --is-text-muted: #786F68;
+
+  --is-hospital: #DC3545;
+  --is-ubs: #07865A;
+  --is-clinic: #0789C7;
+  --is-pharmacy: #F58634;
+
+  --is-radius-card: 20px;
+  --is-radius-control: 13px;
 }

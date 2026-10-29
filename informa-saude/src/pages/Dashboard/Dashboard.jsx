@@ -6,7 +6,6 @@ import {
   CardProgressoSemanal,
   XPChart,
   CardStat,
-  ChatAssistant,
   FooterSistemaMobile
 } from '../../components';
 
