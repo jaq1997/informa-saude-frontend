@@ -16,6 +16,7 @@ import Questionario from "./pages/Questionario/Questionario";
 import NaoEncontrada from "./pages/NaoEncontrada/NaoEncontrada";
 import Dashboard from "./pages/Dashboard/Dashboard";
 import JornadaDetalhesPage from "./pages/Sistema-frontend/JornadaDetalhesPage";
+import MapaSaude from './pages/MapaSaude/MapaSaude';
 
 import { ScrollToTop } from './components';
 import { UserProvider } from './context/UserContext';
@@ -68,6 +69,7 @@ function App() {
           <Route path="/questionario" element={<Questionario />} />
           <Route path="/jornada/:id" element={<JornadaDetalhesPage />} />
           <Route path="/jornadas" element={<Navigate to="/jornada/cardiaca" replace />} />
+          <Route path="/mapa-saude" element={<MapaSaude />} />
           <Route path="/404" element={<NaoEncontrada />} />
           <Route path="/404.html" element={<NaoEncontrada />} />
           <Route path="*" element={<NaoEncontrada />} />
