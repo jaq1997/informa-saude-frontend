@@ -7,6 +7,7 @@ import {
   formatDistance,
   searchHealthPlaces,
   searchPlaceLocation,
+  getPlacePredictions,
 } from "../../utils/health-places";
 
 const HealthMap = lazy(() =>
@@ -28,7 +29,6 @@ const ERR = {
   PLACE_NOT_FOUND:
     "Não encontramos esse endereço. Tente informar a cidade e o estado.",
 };
-
 const GEO_MSG = {
   denied:
     "Você não permitiu o acesso à localização. Pesquise uma cidade, bairro ou endereço abaixo.",
@@ -46,29 +46,26 @@ function getFriendlyError(error) {
 
 export default function MapaSaude() {
   const geo = useGeolocation();
-
   const [manual, setManual] = useState(null);
   const [query, setQuery] = useState("");
   const [geocoding, setGeocoding] = useState(false);
   const [geocodeErr, setGeocodeErr] = useState(null);
-
   const [radius, setRadius] = useState(2000);
-
   const [filters, setFilters] = useState(
     () => new Set(["hospital", "ubs", "clinic", "pharmacy"])
   );
-
   const [places, setPlaces] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [selected, setSelected] = useState(null);
   const [reload, setReload] = useState(0);
   const [mobileView, setMobileView] = useState("map");
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
   const center =
     manual?.point ??
     (geo.status === "ok" ? geo.position : null);
-
   const isExact = !manual && geo.status === "ok";
 
   useEffect(() => {
@@ -78,13 +75,10 @@ export default function MapaSaude() {
       setError(null);
       return;
     }
-
     let stale = false;
-
     setLoading(true);
     setError(null);
     setSelected(null);
-
     searchHealthPlaces({
       lat: center.lat,
       lng: center.lng,
@@ -97,7 +91,6 @@ export default function MapaSaude() {
       })
       .catch((err) => {
         if (stale) return;
-
         setError(getFriendlyError(err));
         setPlaces([]);
       })
@@ -106,7 +99,6 @@ export default function MapaSaude() {
           setLoading(false);
         }
       });
-
     return () => {
       stale = true;
     };
@@ -120,30 +112,52 @@ export default function MapaSaude() {
   const toggle = (id) => {
     setFilters((previous) => {
       const next = new Set(previous);
-
       if (next.has(id)) {
         next.delete(id);
       } else {
         next.add(id);
       }
-
       return next;
     });
   };
 
+  const handleInputChange = async (event) => {
+    const term = event.target.value;
+    setQuery(term);
+
+    if (term.trim().length > 2) {
+      try {
+        const results = await getPlacePredictions(term);
+        const formatted = results
+          .map((item) => item.placePrediction?.text?.text)
+          .filter(Boolean);
+        setSuggestions(formatted);
+        setShowSuggestions(true);
+      } catch (err) {
+        setSuggestions([]);
+        setShowSuggestions(false);
+      }
+    } else {
+      setSuggestions([]);
+      setShowSuggestions(false);
+    }
+  };
+
+  const handleSelectSuggestion = async (selectedText) => {
+    setQuery(selectedText);
+    setShowSuggestions(false);
+    setSuggestions([]);
+  };
+
   const onSearch = async (event) => {
     event.preventDefault();
-
     const term = query.trim();
-
     if (!term || geocoding) return;
-
+    setShowSuggestions(false);
     setGeocoding(true);
     setGeocodeErr(null);
-
     try {
       const result = await searchPlaceLocation(term);
-
       setManual({
         label: result.label,
         point: {
@@ -151,7 +165,6 @@ export default function MapaSaude() {
           lng: result.lng,
         },
       });
-
       setSelected(null);
       setPlaces([]);
       setError(null);
@@ -174,21 +187,17 @@ export default function MapaSaude() {
   return (
     <div className="health-page">
       <SystemNavbar />
-
       <main className="health-main">
         <p className="health-eyebrow">
           Encontre atendimento
         </p>
-
         <h1 className="health-title">
           Pontos de Saúde Próximos
         </h1>
-
         <p className="health-description">
           Veja hospitais, unidades de saúde, clínicas e farmácias
           perto de você, com distância e rota.
         </p>
-
         <section
           className="health-search-panel"
           aria-label="Pesquisar estabelecimentos de saúde"
@@ -200,7 +209,6 @@ export default function MapaSaude() {
               e não fica salva.
             </p>
           )}
-
           {GEO_MSG[geo.status] && !manual && (
             <p
               role="alert"
@@ -209,7 +217,6 @@ export default function MapaSaude() {
               {GEO_MSG[geo.status]}
             </p>
           )}
-
           <div className="health-search-row">
             <button
               type="button"
@@ -223,20 +230,67 @@ export default function MapaSaude() {
                   ? "Atualizar minha localização"
                   : "Usar minha localização"}
             </button>
-
             <form
               onSubmit={onSearch}
               className="health-search-form"
               role="search"
+              style={{ position: "relative" }}
             >
-              <input
-                type="search"
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder="Ou pesquise cidade, bairro ou endereço"
-                aria-label="Pesquisar endereço"
-                className="health-search-input"
-              />
+              <div style={{ position: "relative", flex: 1, display: "flex" }}>
+                <input
+                  type="search"
+                  value={query}
+                  onChange={handleInputChange}
+                  onFocus={() => {
+                    if (suggestions.length > 0) setShowSuggestions(true);
+                  }}
+                  placeholder="Ou pesquise cidade, bairro ou endereço"
+                  aria-label="Pesquisar endereço"
+                  className="health-search-input"
+                  style={{ width: "100%" }}
+                />
+
+                {/* Dropdown de sugestões */}
+                {showSuggestions && suggestions.length > 0 && (
+                  <ul
+                    className="health-suggestions-dropdown"
+                    style={{
+                      position: "absolute",
+                      top: "100%",
+                      left: 0,
+                      right: 0,
+                      zIndex: 1000,
+                      background: "#ffffff",
+                      boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+                      border: "1px solid #e5e7eb",
+                      borderRadius: "0.375rem",
+                      listStyle: "none",
+                      padding: 0,
+                      margin: "4px 0 0 0",
+                      maxHeight: "200px",
+                      overflowY: "auto",
+                    }}
+                  >
+                    {suggestions.map((item, index) => (
+                      <li
+                        key={index}
+                        onMouseDown={() => handleSelectSuggestion(item)}
+                        style={{
+                          padding: "10px 12px",
+                          cursor: "pointer",
+                          fontSize: "0.9rem",
+                          borderBottom: "1px solid #f3f4f6",
+                          color: "#374151",
+                        }}
+                        onMouseEnter={(e) => (e.target.style.background = "#f9fafb")}
+                        onMouseLeave={(e) => (e.target.style.background = "#ffffff")}
+                      >
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
 
               <button
                 type="submit"
@@ -247,7 +301,6 @@ export default function MapaSaude() {
               </button>
             </form>
           </div>
-
           {geocodeErr && (
             <p
               role="alert"
@@ -256,13 +309,11 @@ export default function MapaSaude() {
               {geocodeErr}
             </p>
           )}
-
           {manual && (
             <p className="health-search-caption">
               Buscando perto de: {manual.label}
             </p>
           )}
-
           {center && (
             <div className="health-toolbar">
               <div
@@ -282,10 +333,8 @@ export default function MapaSaude() {
                   </button>
                 ))}
               </div>
-
               <label className="health-radius">
                 <span>Raio</span>
-
                 <select
                   value={radius}
                   onChange={(event) =>
@@ -302,7 +351,6 @@ export default function MapaSaude() {
             </div>
           )}
         </section>
-
         {center && (
           <>
             <div
@@ -322,7 +370,6 @@ export default function MapaSaude() {
               >
                 Mapa
               </button>
-
               <button
                 type="button"
                 onClick={() => setMobileView("list")}
@@ -336,7 +383,6 @@ export default function MapaSaude() {
                 Lista ({visible.length})
               </button>
             </div>
-
             <section
               className="health-results-layout"
               aria-label="Mapa e estabelecimentos encontrados"
@@ -364,7 +410,6 @@ export default function MapaSaude() {
                     onSelect={setSelected}
                   />
                 </Suspense>
-
                 {loading && (
                   <div
                     className="health-map-loading"
@@ -374,7 +419,6 @@ export default function MapaSaude() {
                   </div>
                 )}
               </div>
-
               <aside
                 className={`health-results-panel ${
                   mobileView === "map"
@@ -389,7 +433,6 @@ export default function MapaSaude() {
                       ? "Carregando…"
                       : `${visible.length} locais encontrados`}
                   </p>
-
                   <button
                     type="button"
                     onClick={() =>
@@ -401,7 +444,6 @@ export default function MapaSaude() {
                     Atualizar
                   </button>
                 </div>
-
                 <div className="health-results-list">
                   {error && (
                     <div className="health-error-actions">
@@ -411,7 +453,6 @@ export default function MapaSaude() {
                       >
                         {error}
                       </p>
-
                       <button
                         type="button"
                         onClick={() =>
@@ -423,14 +464,12 @@ export default function MapaSaude() {
                       </button>
                     </div>
                   )}
-
                   {!error && !loading && visible.length === 0 && (
                     <p className="health-empty-state">
                       Nenhum estabelecimento encontrado neste raio.
                       Tente aumentar o raio ou ativar outras categorias.
                     </p>
                   )}
-
                   {!error && (
                     <ul className="health-places-list">
                       {visible.map((place) => {
@@ -439,7 +478,6 @@ export default function MapaSaude() {
                             (category) =>
                               category.id === place.category
                           )?.label ?? "Estabelecimento de saúde";
-
                         return (
                           <li
                             key={place.id}
@@ -454,22 +492,18 @@ export default function MapaSaude() {
                             >
                               {categoryLabel}
                             </p>
-
                             <h2 className="health-place-name">
                               {place.name ??
                                 "Nome não informado pela fonte"}
                             </h2>
-
                             <p className="health-place-address">
                               {place.address ??
                                 "Endereço não informado pela fonte"}
                             </p>
-
                             <p className="health-place-distance">
                               {formatDistance(place.distanceKm)} em
                               linha reta
                             </p>
-
                             <div className="health-place-actions">
                               <button
                                 type="button"
@@ -481,7 +515,6 @@ export default function MapaSaude() {
                               >
                                 Ver no mapa
                               </button>
-
                               <a
                                 href={directionsUrl(place)}
                                 target="_blank"
