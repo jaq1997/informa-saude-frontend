@@ -1004,3 +1004,167 @@ html.alto-contraste .xp-bar.is-current {
 html.alto-contraste .stat-card-icon {
   color: var(--is-contrast-accent) !important;
 }
+
+html.alto-contraste .health-page {
+  background-color: var(--is-contrast-background) !important;
+  color: var(--is-contrast-text) !important;
+}
+
+html.alto-contraste .health-title,
+html.alto-contraste .health-eyebrow,
+html.alto-contraste .health-description {
+  color: var(--is-contrast-accent) !important;
+}
+
+html.alto-contraste .health-search-panel,
+html.alto-contraste .health-results-panel,
+html.alto-contraste .health-map-container {
+  background-color: var(--is-contrast-surface) !important;
+  border-color: var(--is-contrast-accent) !important;
+  color: var(--is-contrast-text) !important;
+  box-shadow: none !important;
+}
+
+html.alto-contraste .health-location-notice,
+html.alto-contraste .health-search-caption,
+html.alto-contraste .health-place-address,
+html.alto-contraste .health-place-distance,
+html.alto-contraste .health-popup-address,
+html.alto-contraste .health-popup-distance,
+html.alto-contraste .health-popup-phone {
+  color: var(--is-contrast-text) !important;
+}
+
+html.alto-contraste .health-search-input {
+  background-color: var(--is-contrast-background) !important;
+  border-color: var(--is-contrast-accent) !important;
+  color: var(--is-contrast-text) !important;
+}
+
+html.alto-contraste .health-search-input::placeholder {
+  color: var(--is-contrast-text) !important;
+  opacity: 0.7;
+}
+
+html.alto-contraste .health-search-input:focus {
+  border-color: var(--is-contrast-accent) !important;
+  outline: 3px solid var(--is-contrast-accent) !important;
+}
+
+html.alto-contraste .health-button-primary {
+  background-color: var(--is-contrast-accent) !important;
+  border-color: var(--is-contrast-accent) !important;
+  color: var(--is-contrast-on-accent) !important;
+}
+
+html.alto-contraste .health-button-outline {
+  background-color: transparent !important;
+  border: 2px solid var(--is-contrast-text) !important;
+  color: var(--is-contrast-text) !important;
+}
+
+html.alto-contraste .health-button-outline:hover:not(:disabled) {
+  background-color: var(--is-contrast-accent) !important;
+  border-color: var(--is-contrast-accent) !important;
+  color: var(--is-contrast-on-accent) !important;
+}
+
+html.alto-contraste .health-filter {
+  background-color: var(--is-contrast-surface) !important;
+  border: 2px solid var(--is-contrast-accent) !important;
+  color: var(--is-contrast-text) !important;
+}
+
+html.alto-contraste .health-filter[aria-pressed="false"] {
+  opacity: 0.6;
+}
+
+html.alto-contraste .health-radius select {
+  background-color: var(--is-contrast-surface) !important;
+  border-color: var(--is-contrast-accent) !important;
+  color: var(--is-contrast-text) !important;
+}
+
+html.alto-contraste .health-place {
+  border-bottom-color: var(--is-contrast-accent) !important;
+}
+
+html.alto-contraste .health-place-selected {
+  background-color: var(--is-contrast-surface) !important;
+  border: 2px solid var(--is-contrast-accent) !important;
+  outline: 2px solid var(--is-contrast-accent) !important;
+}
+
+html.alto-contraste .health-place-name,
+html.alto-contraste .health-popup-name {
+  color: var(--is-contrast-accent) !important;
+}
+
+html.alto-contraste .health-place-action {
+  background-color: transparent !important;
+  border: 2px solid var(--is-contrast-text) !important;
+  color: var(--is-contrast-text) !important;
+}
+
+html.alto-contraste .health-place-action:hover {
+  background-color: var(--is-contrast-accent) !important;
+  border-color: var(--is-contrast-accent) !important;
+  color: var(--is-contrast-on-accent) !important;
+}
+
+html.alto-contraste .health-place-action-primary {
+  background-color: var(--is-contrast-accent) !important;
+  border-color: var(--is-contrast-accent) !important;
+  color: var(--is-contrast-on-accent) !important;
+}
+
+html.alto-contraste .health-mobile-tab {
+  background-color: var(--is-contrast-surface) !important;
+  border: 2px solid var(--is-contrast-accent) !important;
+  color: var(--is-contrast-text) !important;
+}
+
+html.alto-contraste .health-mobile-tab-active {
+  background-color: var(--is-contrast-accent) !important;
+  color: var(--is-contrast-on-accent) !important;
+}
+
+html.alto-contraste .health-map .leaflet-popup-content-wrapper,
+html.alto-contraste .health-map .leaflet-popup-tip {
+  background-color: var(--is-contrast-surface) !important;
+  color: var(--is-contrast-text) !important;
+  border: 2px solid var(--is-contrast-accent) !important;
+  box-shadow: none !important;
+}
+
+html.alto-contraste .health-map .leaflet-control-zoom a {
+  background-color: var(--is-contrast-surface) !important;
+  color: var(--is-contrast-text) !important;
+  border-color: var(--is-contrast-accent) !important;
+}
+
+html.alto-contraste .health-map .leaflet-control-zoom a:hover {
+  background-color: var(--is-contrast-accent) !important;
+  color: var(--is-contrast-on-accent) !important;
+}
+
+html.alto-contraste .health-map-loading {
+  background-color: var(--is-contrast-surface) !important;
+  color: var(--is-contrast-text) !important;
+  border: 1px solid var(--is-contrast-accent) !important;
+}
+
+html.alto-contraste .health-suggestions-dropdown {
+  background-color: var(--is-contrast-surface) !important;
+  border: 2px solid var(--is-contrast-accent) !important;
+}
+
+html.alto-contraste .health-suggestions-dropdown li {
+  color: var(--is-contrast-text) !important;
+  border-bottom-color: var(--is-contrast-accent) !important;
+}
+
+html.alto-contraste .health-suggestions-dropdown li:hover {
+  background-color: var(--is-contrast-accent) !important;
+  color: var(--is-contrast-on-accent) !important;
+}
