@@ -1,4 +1,3 @@
-
 import { useEffect, useRef } from "react";
 import L from "leaflet";
 import {
@@ -43,27 +42,26 @@ const userIcon = L.divIcon({
   iconAnchor: [9, 9],
 });
 
-function FitBounds({ center, places }) {
+function FitBounds({ center, radiusM }) {
   const map = useMap();
 
   useEffect(() => {
-    const points = [
-      [center.lat, center.lng],
-      ...places
-        .slice(0, 40)
-        .map((place) => [place.lat, place.lng]),
-    ];
+    if (!center) return;
 
-    if (points.length === 1) {
-      map.setView([center.lat, center.lng], 15);
-      return;
-    }
+    // Calcula os limites geográficos baseados exatamente no raio selecionado (em metros)
+    const latDelta = radiusM / 111320; 
+    const lngDelta = radiusM / (111320 * Math.cos((center.lat * Math.PI) / 180));
 
-    map.fitBounds(L.latLngBounds(points), {
-      padding: [40, 40],
-      maxZoom: 16,
+    const bounds = L.latLngBounds(
+      [center.lat - latDelta, center.lng - lngDelta],
+      [center.lat + latDelta, center.lng + lngDelta]
+    );
+
+    map.fitBounds(bounds, {
+      padding: [30, 30],
+      maxZoom: 15, // Impede zoom excessivo em raios menores
     });
-  }, [map, center.lat, center.lng, places]);
+  }, [map, center.lat, center.lng, radiusM]);
 
   return null;
 }
@@ -108,11 +106,12 @@ function HealthMap({
       scrollWheelZoom
     >
       <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        attribution='© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
 
-      <FitBounds center={center} places={places} />
+      {/* Passando o radiusM para o FitBounds redimensionar o mapa de acordo com o raio */}
+      <FitBounds center={center} radiusM={radiusM} />
       <FlyTo target={selected} />
 
       <Circle
