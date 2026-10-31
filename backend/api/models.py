@@ -48,8 +48,6 @@ class LimiteRequisicao(Base):
     criado_em = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
 
-# ── MÓDULO JAQ: Estabelecimentos de Saúde e Questionário ─────────────────────
-
 class Estabelecimento(Base):
     __tablename__ = "estabelecimentos"
 

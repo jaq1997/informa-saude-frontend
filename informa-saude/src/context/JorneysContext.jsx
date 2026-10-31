@@ -17,7 +17,6 @@ function reducer(state, action) {
 
   if (proximoDia >= 0) proximoProgresso[proximoDia] = true;
 
-  // Atualiza com segurança o último elemento do XP ou cria um novo
   const novoXpHistorico = [...state.xpHistorico];
   if (novoXpHistorico.length > 0) {
     novoXpHistorico[novoXpHistorico.length - 1] += 320;
@@ -38,7 +37,6 @@ function reducer(state, action) {
 export function JornadasProvider({ children }) {
   const [state, dispatch] = useReducer(reducer, estadoInicial);
 
-  // useMemo impede re-renders desnecessários em componentes filhos
   const value = useMemo(() => ({
     ...state,
     jornadaCompleta: () => dispatch({ type: "jornada-completa" })

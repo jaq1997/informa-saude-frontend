@@ -48,7 +48,6 @@ function FitBounds({ center, radiusM }) {
   useEffect(() => {
     if (!center) return;
 
-    // Calcula os limites geográficos baseados exatamente no raio selecionado (em metros)
     const latDelta = radiusM / 111320; 
     const lngDelta = radiusM / (111320 * Math.cos((center.lat * Math.PI) / 180));
 
@@ -59,7 +58,7 @@ function FitBounds({ center, radiusM }) {
 
     map.fitBounds(bounds, {
       padding: [30, 30],
-      maxZoom: 15, // Impede zoom excessivo em raios menores
+      maxZoom: 15,
     });
   }, [map, center.lat, center.lng, radiusM]);
 
@@ -110,7 +109,6 @@ function HealthMap({
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
 
-      {/* Passando o radiusM para o FitBounds redimensionar o mapa de acordo com o raio */}
       <FitBounds center={center} radiusM={radiusM} />
       <FlyTo target={selected} />
 

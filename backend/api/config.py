@@ -18,9 +18,8 @@ EM_PRODUCAO = AMBIENTE in ("producao", "produção", "production", "prod")
 _proxies_env = os.getenv("PROXIES_CONFIAVEIS", "").strip()
 if EM_PRODUCAO and not _proxies_env:
     raise RuntimeError(
-        "Defina PROXIES_CONFIAVEIS em produção: 0 se a API recebe tráfego direto, "
-        "1 se há um proxy na frente (Render, Railway, Nginx...), 2 se há dois (ex.: Cloudflare + hospedagem). "
-        "Se ficar errado, o limite por IP trata todos os usuários como um só."
+        "PROXIES_CONFIAVEIS é obrigatório em produção "
+        "(0: direto; 1: um proxy; 2: dois proxies)."
     )
 try:
     PROXIES_CONFIAVEIS = int(_proxies_env or "0")

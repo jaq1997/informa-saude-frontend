@@ -490,7 +490,7 @@ def alterar_senha(
     }
 
 
-# ── MÓDULO JAQ: Questionário de Triagem e Rede de Saúde ──────────────────────
+
 
 from . import questionario, geo
 from .database import engine as _engine
