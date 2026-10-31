@@ -6,7 +6,10 @@ logger = logging.getLogger(__name__)
 
 VIACEP_URL = "https://viacep.com.br/ws/{cep}/json/"
 NOMINATIM_URL = "https://nominatim.openstreetmap.org/search"
-NOMINATIM_HEADERS = {"User-Agent": "InformaSaude/1.0 (projeto-maisprati)"}
+NOMINATIM_HEADERS = {
+    "User-Agent": "InformaSaude/1.0 (projeto-academico; contato: suporte@informasaude.local)",
+    "Accept-Language": "pt-BR",
+}
 OSRM_TABLE_URL = "https://router.project-osrm.org/table/v1/driving/{coords}"
 
 
@@ -69,6 +72,33 @@ async def geocodificar_cep(cep: str) -> tuple[float, float]:
             raise ValueError("Não foi possível determinar a localização a partir do CEP.")
 
         return float(resultados[0]["lat"]), float(resultados[0]["lon"])
+
+
+async def buscar_enderecos(query: str, limite: int = 5) -> list[dict]:
+    termo = query.strip()
+    if len(termo) < 3:
+        return []
+
+    async with httpx.AsyncClient(timeout=10, follow_redirects=True) as client:
+        resposta = await client.get(
+            NOMINATIM_URL,
+            params={
+                "q": termo,
+                "format": "jsonv2",
+                "addressdetails": 1,
+                "countrycodes": "br",
+                "limit": min(limite, 5),
+                "accept-language": "pt-BR",
+            },
+            headers=NOMINATIM_HEADERS,
+        )
+        resposta.raise_for_status()
+        return resposta.json()
+
+
+async def geocodificar_endereco(query: str) -> dict | None:
+    resultados = await buscar_enderecos(query, limite=1)
+    return resultados[0] if resultados else None
 
 
 async def calcular_distancias_reais_osrm(lat_ref: float, lng_ref: float, estabelecimentos: list) -> list[tuple]:
