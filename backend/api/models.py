@@ -72,7 +72,7 @@ class ResultadoQuestionario(Base):
     __tablename__ = "resultados_questionario"
 
     id = Column(BigInteger, primary_key=True)
-    user_id = Column(BigInteger, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    usuario_id = Column(BigInteger, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     respostas = Column(Text, nullable=False)       # JSON em string das respostas
     pontuacao = Column(Text, nullable=False)        # JSON em string dos pontos por jornada
     jornada_recomendada = Column(String(50), nullable=False)  # "cardiaca", "sono", "respiratoria"

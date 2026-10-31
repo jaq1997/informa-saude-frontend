@@ -1,16 +1,26 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { GoogleLogin } from '@react-oauth/google';
 import { AuthModalLayout } from './AuthModalLayout';
 import { FormInput } from '../../components';
-import googleIcon from '../../assets/images/google.svg';
-import { API_BASE_URL } from '../../config/api';
+import RecoverPasswordModal from '../RecoverPassword/RecoverEmailGet/RecoverPasswordModal';
+import { entrar, entrarComGoogle, buscarPerfil } from '../../api/api';
+import { useUser } from '../../context/userContextStore';
+
+const mensagemDeErro = (err) =>
+  err.message === 'Failed to fetch'
+    ? 'Não foi possível conectar ao servidor. Tente novamente.'
+    : err.message;
 
 export function ModalLogin({ onClose, onAbrirCadastro }) {
   const navigate = useNavigate();
-  const [usuario, setUsuario] = useState('');
+  const { atualizarUsuario } = useUser();
+
+  const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
-  const [carregando, setCarregando] = useState(false);
+  const [open, setOpen] = useState(false);
   const [erro, setErro] = useState('');
+  const [carregando, setCarregando] = useState(false);
 
   useEffect(() => {
     document.body.style.overflow = 'hidden';
@@ -19,58 +29,49 @@ export function ModalLogin({ onClose, onAbrirCadastro }) {
     };
   }, []);
 
+  const concluirLogin = async ({ novoUsuario = false } = {}) => {
+    const perfil = await buscarPerfil();
+    atualizarUsuario({ nome: perfil.nome, email: perfil.email });
+    onClose();
+    navigate(novoUsuario ? '/questionario' : '/inicio');
+  };
+
   const handleEntrar = async (e) => {
     e.preventDefault();
     setErro('');
     setCarregando(true);
 
     try {
-      const resposta = await fetch(`${API_BASE_URL}/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: usuario.trim(),
-          senha: senha,
-        }),
-      });
-
-      if (!resposta.ok) {
-        const erroDados = await resposta.json().catch(() => ({}));
-        throw new Error(erroDados.detail || 'E-mail ou senha incorretos.');
-      }
-
-      const dados = await resposta.json();
-      if (dados.access_token) {
-        localStorage.setItem('access_token', dados.access_token);
-      }
-
-      onClose();
-      navigate('/inicio');
+      await entrar(email.trim().toLowerCase(), senha);
+      await concluirLogin();
     } catch (err) {
-      setErro(err.message || 'Erro ao realizar login.');
+      setErro(mensagemDeErro(err));
     } finally {
       setCarregando(false);
+    }
+  };
+
+  const handleGoogle = async ({ credential }) => {
+    setErro('');
+    try {
+      const dados = await entrarComGoogle(credential);
+      await concluirLogin({ novoUsuario: dados.novo_usuario });
+    } catch (err) {
+      setErro(mensagemDeErro(err));
     }
   };
 
   return (
     <AuthModalLayout onClose={onClose} titulo="Acessar conta" centralizarConteudo>
       <form onSubmit={handleEntrar}>
-        {erro && (
-          <div className="alert alert-danger py-2 small mb-3" role="alert">
-            {erro}
-          </div>
-        )}
-
         <FormInput
-          id="modal-usuario"
-          label="Usuário ou E-mail"
-          type="text"
-          placeholder="Digite seu e-mail cadastrado"
-          value={usuario}
-          onChange={(e) => setUsuario(e.target.value)}
+          id="modal-email"
+          label="E-mail"
+          type="email"
+          placeholder="Digite seu e-mail"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          autoComplete="username"
           required
         />
 
@@ -82,18 +83,30 @@ export function ModalLogin({ onClose, onAbrirCadastro }) {
           placeholder="Digite sua senha"
           value={senha}
           onChange={(e) => setSenha(e.target.value)}
+          autoComplete="current-password"
           required
         />
 
         <div className="text-end mb-4">
-          <a href="/404.html" className="text-decoration-none fw-bold fs-6 text-dark">
-            Esqueci minha senha
-          </a>
+          <button
+            className="button-recover-password"
+            type="button"
+            onClick={() => setOpen(true)}
+          >
+            Esqueceu sua senha?
+          </button>
+          <RecoverPasswordModal open={open} onClose={() => setOpen(false)} />
         </div>
 
+        {erro && (
+          <div className="text-danger fs-6 mb-2 text-center" role="alert">
+            {erro}
+          </div>
+        )}
+
         <div className="d-flex flex-column gap-2 mt-2">
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             className="is-btn is-btn--orange w-100 fs-6 py-2"
             disabled={carregando}
           >
@@ -106,19 +119,28 @@ export function ModalLogin({ onClose, onAbrirCadastro }) {
             <hr className="flex-fill my-0 text-muted opacity-25" />
           </div>
 
-          <button
-            type="button"
-            className="btn is-btn-google w-100 py-2 fs-6 d-flex align-items-center justify-content-center"
-            onClick={() => alert('Integração com Google Login em breve!')}
-          >
-            <img src={googleIcon} alt="" width="18" height="18" className="me-2" aria-hidden="true" />
-            Entrar com o Google
-          </button>
+          <div className="d-flex justify-content-center">
+  <GoogleLogin
+    onSuccess={handleGoogle}
+    onError={() => setErro('Não foi possível entrar com o Google.')}
+    locale="pt-BR"
+    theme="outline"            
+    size="large"              
+    shape="pill"               
+    text="continue_with"      
+    logo_alignment="center"    
+    width="350"                
+  />
+</div>
         </div>
 
         <div className="text-center mt-2 pt-2">
           <span className="text-muted fs-6">Ainda não tem conta? </span>
-          <button type="button" className="is-link-button is-auth-access-link fs-6" onClick={onAbrirCadastro}>
+          <button
+            type="button"
+            className="is-link-button is-auth-access-link fs-6"
+            onClick={onAbrirCadastro}
+          >
             Criar conta grátis
           </button>
         </div>

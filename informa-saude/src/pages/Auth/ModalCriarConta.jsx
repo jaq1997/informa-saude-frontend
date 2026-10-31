@@ -272,6 +272,7 @@ export function ModalCriarConta({ onClose, onAbrirLogin }) {
             placeholder="seuemail@exemplo.com"
             value={dadosCadastro.email}
             onChange={(e) => atualizarCampo('email', e.target.value)}
+            autoComplete="email"
             required
           />
 
@@ -297,6 +298,7 @@ export function ModalCriarConta({ onClose, onAbrirLogin }) {
               setErroEtapa2('');
               atualizarCampo('senha', e.target.value);
             }}
+            autoComplete="new-password"
             required
           />
 
@@ -311,6 +313,7 @@ export function ModalCriarConta({ onClose, onAbrirLogin }) {
               setErroEtapa2('');
               atualizarCampo('confirmarSenha', e.target.value);
             }}
+            autoComplete="new-password"
             required
           />
 
