@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { User, Gift, BookOpen, Hospital } from 'lucide-react';
 import imgCardiaca from '../../assets/images/imagem-cardiaca.webp';
 import imgSono from '../../assets/images/imagem-sono.webp';
@@ -11,7 +12,6 @@ import {
   FooterSistemaMobile,
   TituloPaginaSistema,
   TituloSecao,
-  ModalRedeSaude,
 } from '../../components';
 import { obterNomeUsuario } from '../../utils/usuario';
 import { useUser } from '../../context/userContextStore';
@@ -85,7 +85,7 @@ const JORNADAS_RECOMENDADAS = [
 export function HomeSistema() {
   const nomeUsuario = obterNomeUsuario();
   const { jornadaRecomendada } = useUser();
-  const [modalRedeAberto, setModalRedeAberto] = useState(false);
+  const navigate = useNavigate();
   const [conteudosEmAndamento] = useState(() => obterConteudosEmAndamento(jornadaRecomendada));
   const jornadaDestaque = JORNADAS_RECOMENDADAS.find(
     (jornada) => jornada.id === jornadaRecomendada
@@ -107,7 +107,7 @@ export function HomeSistema() {
             {ACOES_RAPIDAS.map((acao) => (
               <div key={acao.id} className="col-6 col-md-4 col-lg-3">
                 {acao.id === 'rede-publica' ? (
-                  <div role="button" onClick={() => setModalRedeAberto(true)} style={{ cursor: 'pointer' }}>
+                  <div role="button" onClick={() => navigate('/mapa-saude')} style={{ cursor: 'pointer' }}>
                     <CardSistema isAcao icone={acao.icone} titulo={acao.titulo} />
                   </div>
                 ) : (
@@ -118,8 +118,6 @@ export function HomeSistema() {
           </div>
         </section>
 
-        {/* Modal de Busca de UPAs e Hospitais (Geolocalização / ViaCEP) */}
-        <ModalRedeSaude aberto={modalRedeAberto} aoFechar={() => setModalRedeAberto(false)} />
 
 
         {jornadaDestaque ? (

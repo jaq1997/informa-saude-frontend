@@ -11,7 +11,7 @@ from google.oauth2 import id_token
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
-from . import limites, models, schemas, security
+from . import geo, limites, models, schemas, security
 from .config import CORS_ORIGINS, EM_PRODUCAO, GOOGLE_CLIENT_ID
 from .database import get_db
 from .email import enviar_codigo_verificacao
@@ -94,7 +94,8 @@ def login_google(dados: schemas.GoogleLogin, db: Session = Depends(get_db)):
 
     user = db.query(models.User).filter(func.lower(models.User.email) == email).first()
 
-    if not user:
+    novo_usuario = user is None
+    if novo_usuario:
         user = models.User(
             nome=info.get("name") or email.split("@")[0],
             email=email,
@@ -117,7 +118,16 @@ def login_google(dados: schemas.GoogleLogin, db: Session = Depends(get_db)):
 
     db.commit()
     db.refresh(user)
-    return {"access_token": security.criar_token(user.id, user.email, user.token_version)}
+
+    resultado = db.query(models.ResultadoQuestionario).filter(
+        models.ResultadoQuestionario.usuario_id == user.id
+    ).first()
+    novo_usuario = novo_usuario or resultado is None
+
+    return {
+        "access_token": security.criar_token(user.id, user.email, user.token_version),
+        "novo_usuario": novo_usuario,
+    }
 
 
 @app.post("/register", status_code=201)
@@ -495,7 +505,7 @@ def listar_perguntas():
     perguntas_publicas = []
     for p in questionario.PERGUNTAS:
         opcoes = [
-            {"id": op["id"], "titulo": op["titulo"], "descricao": op["descricao"]}
+            {"id": op["id"], "titulo": op["titulo"], "descricao": op.get("descricao", "")}
             for op in p["opcoes"]
         ]
         perguntas_publicas.append({
@@ -515,20 +525,63 @@ def processar_questionario(
 ):
     """Recebe as respostas do questionário e define a jornada do usuário logado."""
     try:
-        resultado = questionario.calcular_jornada_recomendada(dados.respostas)
+        resultado = questionario.calcular_jornada_recomendada(
+            dados.respostas,
+            dados.jornada_escolhida,
+        )
     except ValueError as e:
         raise HTTPException(status_code=422, detail=str(e))
 
-    registro = models.ResultadoQuestionario(
-        user_id=usuario.id,
-        respostas=json.dumps(dados.respostas),
-        pontuacao=json.dumps(resultado["pontuacao"]),
-        jornada_recomendada=resultado["jornada_recomendada"],
-    )
-    db.add(registro)
-    db.commit()
+    persistido = False
+    if resultado["jornada_recomendada"] is not None:
+        registro = models.ResultadoQuestionario(
+            usuario_id=usuario.id,
+            respostas=json.dumps(dados.respostas),
+            pontuacao=json.dumps(resultado["pontuacao"]),
+            jornada_recomendada=resultado["jornada_recomendada"],
+        )
+        db.add(registro)
+        db.commit()
+        persistido = True
 
+    resultado["persistido"] = persistido
     return resultado
+
+
+@app.get("/api/mapa/enderecos")
+async def buscar_sugestoes_endereco(q: str, limit: int = 5):
+    try:
+        resultados = await geo.buscar_enderecos(q, limit)
+        return [
+            {
+                "label": item.get("display_name"),
+                "lat": float(item["lat"]),
+                "lng": float(item["lon"]),
+            }
+            for item in resultados
+            if item.get("display_name") and item.get("lat") and item.get("lon")
+        ]
+    except Exception as exc:
+        logger.warning("Falha ao consultar geocodificação: %s", exc)
+        raise HTTPException(status_code=502, detail="Serviço de endereços indisponível")
+
+
+@app.get("/api/mapa/geocodificar")
+async def geocodificar_endereco_mapa(q: str):
+    try:
+        resultado = await geo.geocodificar_endereco(q)
+        if not resultado:
+            raise HTTPException(status_code=404, detail="Endereço não encontrado")
+        return {
+            "label": resultado.get("display_name") or q,
+            "lat": float(resultado["lat"]),
+            "lng": float(resultado["lon"]),
+        }
+    except HTTPException:
+        raise
+    except Exception as exc:
+        logger.warning("Falha ao consultar geocodificação: %s", exc)
+        raise HTTPException(status_code=502, detail="Serviço de endereços indisponível")
 
 
 @app.get("/api/estabelecimentos/proximos", response_model=list[schemas.EstabelecimentoResponse])
