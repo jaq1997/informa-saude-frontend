@@ -1,0 +1,49 @@
+{
+  "perguntas": [
+    { "id": "1", "subtitulo": "Motivação de aprendizado", "titulo": "O que mais motiva você a assistir a um conteúdo educativo no aplicativo hoje?", "opcoes": [
+      { "id": "cardiaca", "jornada": "cardiaca", "titulo": "Aprender orientações práticas para a rotina, como cuidar da alimentação e manter a pressão equilibrada." },
+      { "id": "respiratoria", "jornada": "respiratoria", "titulo": "Conhecer hábitos de proteção para a casa e o ambiente, como cuidar da ventilação e da qualidade do ar." },
+      { "id": "sono", "jornada": "sono", "titulo": "Entender o funcionamento do organismo e como a rotina noturna ajuda a renovar a disposição." }
+    ]},
+    { "id": "2", "subtitulo": "Espaços e momentos do dia", "titulo": "Em qual momento ou espaço do seu dia você gostaria de aplicar novos conhecimentos?", "opcoes": [
+      { "id": "respiratoria", "jornada": "respiratoria", "titulo": "Na sala e nos quartos, mantendo os ambientes bem arejados e livres de poeira." },
+      { "id": "sono", "jornada": "sono", "titulo": "No quarto, criando uma atmosfera calma e adequada para a noite." },
+      { "id": "cardiaca", "jornada": "cardiaca", "titulo": "Na rotina de momentos ao ar livre, caminhadas ou exercícios leves no bairro." }
+    ]},
+    { "id": "3", "subtitulo": "Dúvidas comuns do cotidiano", "titulo": "Qual destas dúvidas frequentes você mais gostaria de esclarecer com conteúdos educativos?", "opcoes": [
+      { "id": "sono", "jornada": "sono", "titulo": "Como o uso de telas ou o consumo de café no fim da tarde podem influenciar o descanso noturno." },
+      { "id": "cardiaca", "jornada": "cardiaca", "titulo": "Como o consumo de sal, temperos e alimentos processados se relaciona com a saúde da pressão." },
+      { "id": "respiratoria", "jornada": "respiratoria", "titulo": "Quais são as diferenças comuns entre uma reação alérgica e um resfriado convencional." }
+    ]},
+    { "id": "4", "subtitulo": "Assuntos sobre hábitos da rotina", "titulo": "Qual destes assuntos sobre a rotina diária você prefere explorar?", "opcoes": [
+      { "id": "cardiaca", "jornada": "cardiaca", "titulo": "Orientações sobre como organizar uma rotina de caminhadas e atividades físicas com segurança." },
+      { "id": "sono", "jornada": "sono", "titulo": "Técnicas simples de relaxamento no fim do dia para ajudar a desligar das preocupações na hora de deitar." },
+      { "id": "respiratoria", "jornada": "respiratoria", "titulo": "Cuidados práticos com a casa e o ambiente em períodos de mudança de tempo ou ar seco." }
+    ]},
+    { "id": "5", "subtitulo": "Escolhas e estilo de vida", "titulo": "Sobre qual destas relações entre hábitos do cotidiano e o corpo você prefere se informar?", "opcoes": [
+      { "id": "respiratoria", "jornada": "respiratoria", "titulo": "Como a hidratação e a limpeza dos ambientes ajudam a evitar desconfortos no nariz e na garganta." },
+      { "id": "cardiaca", "jornada": "cardiaca", "titulo": "Como a escolha dos alimentos e o controle do sal influenciam a saúde do coração e das artérias." },
+      { "id": "sono", "jornada": "sono", "titulo": "Como o horário das refeições noturnas e o consumo de estimulantes interferem no adormecimento." }
+    ]},
+    { "id": "6", "subtitulo": "Saúde ao longo da maturidade", "titulo": "Pensando nos cuidados com a saúde ao longo dos anos, qual tema você tem mais interesse em acompanhar?", "opcoes": [
+      { "id": "sono", "jornada": "sono", "titulo": "Como a qualidade contínua do sono se relaciona com a preservação da memória e a saúde cerebral." },
+      { "id": "respiratoria", "jornada": "respiratoria", "titulo": "Como cuidados contínuos com a respiração (em condições como asma ou enfisema) são acompanhados ao longo do tempo." },
+      { "id": "cardiaca", "jornada": "cardiaca", "titulo": "Como as mudanças hormonais na maturidade (como a menopausa) podem influenciar os cuidados cardiovasculares." }
+    ]},
+    { "id": "7", "subtitulo": "Prevenção e acompanhamento", "titulo": "Qual destes tópicos sobre prevenção e acompanhamento você gostaria de conhecer melhor?", "opcoes": [
+      { "id": "cardiaca", "jornada": "cardiaca", "titulo": "A importância de exames de rotina e o monitoramento da frequência cardíaca na prática de exercícios." },
+      { "id": "respiratoria", "jornada": "respiratoria", "titulo": "Como se proteger de gripes e infecções comuns do inverno por meio da vacinação e de hábitos higiênicos." },
+      { "id": "sono", "jornada": "sono", "titulo": "Como manter a regularidade nos horários de descanso mesmo em dias com rotinas diferentes." }
+    ]},
+    { "id": "8", "subtitulo": "Conselhos e orientações práticas", "titulo": "Qual tipo de informação sobre o bem-estar diário você acharia mais útil receber?", "opcoes": [
+      { "id": "respiratoria", "jornada": "respiratoria", "titulo": "Informações sobre cuidados com o ar e proteção dos pulmões em dias secos ou com poluição." },
+      { "id": "sono", "jornada": "sono", "titulo": "Informações sobre práticas de desaceleração para preparar o corpo para uma noite tranquila." },
+      { "id": "cardiaca", "jornada": "cardiaca", "titulo": "Informações sobre a relação entre hábitos cotidianos, pressão arterial e circulação." }
+    ]},
+    { "id": "9", "subtitulo": "Vídeo educativo inicial", "titulo": "Se você fosse assistir ao seu primeiro vídeo no aplicativo hoje, qual tema escolheria?", "opcoes": [
+      { "id": "sono", "jornada": "sono", "titulo": "Um vídeo sobre hábitos para desacelerar à noite e preparar o ambiente para um descanso tranquilo." },
+      { "id": "cardiaca", "jornada": "cardiaca", "titulo": "Um vídeo sobre como os hábitos cotidianos se relacionam com a saúde da pressão e da circulação." },
+      { "id": "respiratoria", "jornada": "respiratoria", "titulo": "Um vídeo com orientações sobre cuidados com a qualidade do ar em casa e a proteção da respiração." }
+    ]}
+  ]
+}

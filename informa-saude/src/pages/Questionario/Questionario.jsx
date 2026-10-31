@@ -90,7 +90,10 @@ export function Questionario() {
       };
       const res = await fetch(`${API_BASE_URL}/api/questionario/resultado`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: "Bearer " + localStorage.getItem("token")
+        },
         body: JSON.stringify(payload)
       });
 

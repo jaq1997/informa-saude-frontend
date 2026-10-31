@@ -67,9 +67,10 @@ class GoogleLogin(BaseModel):
 class Token(BaseModel):
     access_token: str
     token_type: str = "bearer"
+    novo_usuario: bool = False
 
 
-# ── MÓDULO JAQ: Estabelecimentos de Saúde e Questionário ─────────────────────
+
 
 class EstabelecimentoBase(BaseModel):
     nome: str = Field(min_length=1, max_length=200)
@@ -110,12 +111,14 @@ class EstabelecimentoResponse(EstabelecimentoBase):
 
 
 class QuestionarioRespostas(BaseModel):
-    # user_id vem do token JWT — não precisa enviar no body
-    respostas: dict[str, str]  # {"1": "a", "2": "b", ...}
+    respostas: dict[str, str]
+    jornada_escolhida: str | None = None
 
 
 class QuestionarioResultado(BaseModel):
-    jornada_recomendada: str
+    jornada_recomendada: str | None = None
     pontuacao: dict[str, int]
     empate: bool = False
+    jornadas_empatadas: list[str] = []
+    persistido: bool = False
     mensagem: str
