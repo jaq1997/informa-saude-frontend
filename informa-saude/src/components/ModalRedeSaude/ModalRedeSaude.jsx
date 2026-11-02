@@ -12,7 +12,7 @@ export function ModalRedeSaude({ aberto, aoFechar }) {
   const [precisaoLocalizacao, setPrecisaoLocalizacao] = useState(null);
 
   const obterHeadersComToken = () => {
-    const token = localStorage.getItem('access_token');
+    const token = localStorage.getItem('token') || localStorage.getItem('access_token');
     const headers = { 'Content-Type': 'application/json' };
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;

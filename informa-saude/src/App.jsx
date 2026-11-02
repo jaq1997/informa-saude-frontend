@@ -18,7 +18,7 @@ import Dashboard from "./pages/Dashboard/Dashboard";
 import JornadaDetalhesPage from "./pages/Sistema-frontend/JornadaDetalhesPage";
 import MapaSaude from './pages/MapaSaude/MapaSaude';
 
-import { ScrollToTop } from './components';
+import { ScrollToTop, ProtectedRoute } from './components';
 import { UserProvider } from './context/UserContext.jsx';
 
 function LandingPage() {
@@ -61,19 +61,19 @@ function App() {
         <ScrollToTop />
         <Routes>
           <Route path="/" element={<LandingPage />} />
-          <Route path="/inicio" element={<HomeSistema />} />
+          <Route path="/inicio" element={<ProtectedRoute><HomeSistema /></ProtectedRoute>} />
           <Route path="/perfil" element={<Navigate to="/meu-perfil" replace />} />
-          <Route path="/meu-perfil" element={<MeuPerfil />} />
-          <Route path="/editar-perfil" element={<EditarPerfil />} />
-          <Route path="/configuracoes" element={<Configuracoes />} />
-          <Route path="/questionario" element={<Questionario />} />
-          <Route path="/jornada/:id" element={<JornadaDetalhesPage />} />
+          <Route path="/meu-perfil" element={<ProtectedRoute><MeuPerfil /></ProtectedRoute>} />
+          <Route path="/editar-perfil" element={<ProtectedRoute><EditarPerfil /></ProtectedRoute>} />
+          <Route path="/configuracoes" element={<ProtectedRoute><Configuracoes /></ProtectedRoute>} />
+          <Route path="/questionario" element={<ProtectedRoute><Questionario /></ProtectedRoute>} />
+          <Route path="/jornada/:id" element={<ProtectedRoute><JornadaDetalhesPage /></ProtectedRoute>} />
           <Route path="/jornadas" element={<Navigate to="/jornada/cardiaca" replace />} />
-          <Route path="/mapa-saude" element={<MapaSaude />} />
+          <Route path="/mapa-saude" element={<ProtectedRoute><MapaSaude /></ProtectedRoute>} />
           <Route path="/404" element={<NaoEncontrada />} />
           <Route path="/404.html" element={<NaoEncontrada />} />
           <Route path="*" element={<NaoEncontrada />} />
-          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         </Routes>
       </BrowserRouter>
     </UserProvider>

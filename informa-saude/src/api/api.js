@@ -36,12 +36,14 @@ export const reenviarCodigoCadastro = (email) =>
 export async function entrar(email, senha) {
   const dados = await chamar("/login", { email, senha });
   localStorage.setItem("token", dados.access_token);
+  localStorage.setItem("access_token", dados.access_token);
   return dados;
 }
 
 export async function entrarComGoogle(credential) {
   const dados = await chamar("/auth/google", { credential });
   localStorage.setItem("token", dados.access_token);
+  localStorage.setItem("access_token", dados.access_token);
   return dados;
 }
 

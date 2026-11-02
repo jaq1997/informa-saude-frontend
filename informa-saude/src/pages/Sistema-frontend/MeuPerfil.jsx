@@ -29,6 +29,10 @@ export function MeuPerfil() {
   };
 
   const handleConfirmarSair = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('informa-saude-usuario-ativo');
+    localStorage.removeItem('informa-saude-jornada-destaque');
     setModalSair(false);
     navigate('/');
   };

@@ -426,8 +426,18 @@ def login(dados: schemas.LoginData, request: Request, db: Session = Depends(get_
             detail="Confirme seu e-mail antes de entrar. Refaça o cadastro para receber um novo código.",
         )
 
+    resultado = (
+        db.query(models.ResultadoQuestionario)
+        .filter(models.ResultadoQuestionario.usuario_id == user.id)
+        .first()
+    )
+    novo_usuario = resultado is None
+
     limites.limpar(db, "LOGIN", chave_email)
-    return {"access_token": security.criar_token(user.id, user.email, user.token_version)}
+    return {
+        "access_token": security.criar_token(user.id, user.email, user.token_version),
+        "novo_usuario": novo_usuario,
+    }
 
 
 def usuario_atual(
@@ -448,12 +458,18 @@ def usuario_atual(
 
 
 @app.get("/me")
-def me(user: models.User = Depends(usuario_atual)):
+def me(user: models.User = Depends(usuario_atual), db: Session = Depends(get_db)):
+    resultado = (
+        db.query(models.ResultadoQuestionario)
+        .filter(models.ResultadoQuestionario.usuario_id == user.id)
+        .first()
+    )
     return {
         "id": user.id,
         "nome": user.nome,
         "email": user.email,
         "avatar_url": user.avatar_url,
+        "jornada_recomendada": resultado.jornada_recomendada if resultado else None,
     }
 
 
@@ -534,13 +550,24 @@ def processar_questionario(
 
     persistido = False
     if resultado["jornada_recomendada"] is not None:
-        registro = models.ResultadoQuestionario(
-            usuario_id=usuario.id,
-            respostas=json.dumps(dados.respostas),
-            pontuacao=json.dumps(resultado["pontuacao"]),
-            jornada_recomendada=resultado["jornada_recomendada"],
+        registro = (
+            db.query(models.ResultadoQuestionario)
+            .filter(models.ResultadoQuestionario.usuario_id == usuario.id)
+            .first()
         )
-        db.add(registro)
+        if registro:
+            registro.respostas = json.dumps(dados.respostas)
+            registro.pontuacao = json.dumps(resultado["pontuacao"])
+            registro.jornada_recomendada = resultado["jornada_recomendada"]
+            registro.criado_em = datetime.now(timezone.utc)
+        else:
+            registro = models.ResultadoQuestionario(
+                usuario_id=usuario.id,
+                respostas=json.dumps(dados.respostas),
+                pontuacao=json.dumps(resultado["pontuacao"]),
+                jornada_recomendada=resultado["jornada_recomendada"],
+            )
+            db.add(registro)
         db.commit()
         persistido = True
 

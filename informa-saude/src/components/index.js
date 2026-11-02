@@ -26,3 +26,4 @@ export { default as XPChart } from './XPChart/XPChart';
 export { default as CardStat } from './CardStat/CardStat';
 export { DropdownSistema } from './DropdownSistema/DropdownSistema';
 export { IconeContraste } from './IconeContraste/IconeContraste';
+export { ProtectedRoute } from './ProtectedRoute/ProtectedRoute';

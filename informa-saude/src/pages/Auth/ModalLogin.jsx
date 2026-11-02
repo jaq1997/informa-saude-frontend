@@ -14,7 +14,7 @@ const mensagemDeErro = (err) =>
 
 export function ModalLogin({ onClose, onAbrirCadastro }) {
   const navigate = useNavigate();
-  const { atualizarUsuario } = useUser();
+  const { atualizarUsuario, atualizarJornada } = useUser();
 
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
@@ -32,6 +32,9 @@ export function ModalLogin({ onClose, onAbrirCadastro }) {
   const concluirLogin = async ({ novoUsuario = false } = {}) => {
     const perfil = await buscarPerfil();
     atualizarUsuario({ nome: perfil.nome, email: perfil.email });
+    if (perfil?.jornada_recomendada) {
+      atualizarJornada(perfil.jornada_recomendada);
+    }
     onClose();
     navigate(novoUsuario ? '/questionario' : '/inicio');
   };
@@ -42,8 +45,8 @@ export function ModalLogin({ onClose, onAbrirCadastro }) {
     setCarregando(true);
 
     try {
-      await entrar(email.trim().toLowerCase(), senha);
-      await concluirLogin();
+      const dados = await entrar(email.trim().toLowerCase(), senha);
+      await concluirLogin({ novoUsuario: dados?.novo_usuario });
     } catch (err) {
       setErro(mensagemDeErro(err));
     } finally {
