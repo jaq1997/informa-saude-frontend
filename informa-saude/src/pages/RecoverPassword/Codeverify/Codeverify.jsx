@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import './Codeverify.css'
 import { pedirCodigo, verificarCodigo } from '../../../api/api'
 
@@ -20,7 +20,6 @@ const verificarRecuperacao = async (email, codigo) => {
 export function VerifyCode({
   email,
   onSuccess,
-  onClose,
   onBack,
   verificar = verificarRecuperacao,
   reenviar = pedirCodigo,

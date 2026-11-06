@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import './NewPassword.css'
 import { definirNovaSenha } from '../../../api/api'
 
@@ -30,7 +30,7 @@ const isStrongPassword = (password) =>
   /[a-z]/.test(password) &&
   /\d/.test(password)
 
-function ResetPassword({ resetToken, onSuccess, onClose, onBack }) {
+function ResetPassword({ resetToken, onSuccess, onBack }) {
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [showNewPassword, setShowNewPassword] = useState(false)

@@ -70,15 +70,19 @@ export default function MapaSaude() {
 
   useEffect(() => {
     if (!center) {
-      setPlaces([]);
-      setLoading(false);
-      setError(null);
+      queueMicrotask(() => {
+        setPlaces([]);
+        setLoading(false);
+        setError(null);
+      });
       return;
     }
     let stale = false;
-    setLoading(true);
-    setError(null);
-    setSelected(null);
+    queueMicrotask(() => {
+      setLoading(true);
+      setError(null);
+      setSelected(null);
+    });
     searchHealthPlaces({
       lat: center.lat,
       lng: center.lng,
@@ -89,9 +93,9 @@ export default function MapaSaude() {
           setPlaces(results);
         }
       })
-      .catch((err) => {
+      .catch(() => {
         if (stale) return;
-        setError(getFriendlyError(err));
+        setError(ERR.NETWORK);
         setPlaces([]);
       })
       .finally(() => {
@@ -102,7 +106,7 @@ export default function MapaSaude() {
     return () => {
       stale = true;
     };
-  }, [center?.lat, center?.lng, radius, reload]);
+  }, [center, radius, reload]);
 
   const visible = useMemo(
     () => places.filter((place) => filters.has(place.category)),
@@ -133,7 +137,7 @@ export default function MapaSaude() {
           .filter(Boolean);
         setSuggestions(formatted);
         setShowSuggestions(true);
-      } catch (err) {
+      } catch {
         setSuggestions([]);
         setShowSuggestions(false);
       }

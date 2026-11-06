@@ -44,23 +44,25 @@ const userIcon = L.divIcon({
 
 function FitBounds({ center, radiusM }) {
   const map = useMap();
+  const lat = center?.lat;
+  const lng = center?.lng;
 
   useEffect(() => {
-    if (!center) return;
+    if (lat == null || lng == null) return;
 
     const latDelta = radiusM / 111320; 
-    const lngDelta = radiusM / (111320 * Math.cos((center.lat * Math.PI) / 180));
+    const lngDelta = radiusM / (111320 * Math.cos((lat * Math.PI) / 180));
 
     const bounds = L.latLngBounds(
-      [center.lat - latDelta, center.lng - lngDelta],
-      [center.lat + latDelta, center.lng + lngDelta]
+      [lat - latDelta, lng - lngDelta],
+      [lat + latDelta, lng + lngDelta]
     );
 
     map.fitBounds(bounds, {
       padding: [30, 30],
       maxZoom: 15,
     });
-  }, [map, center.lat, center.lng, radiusM]);
+  }, [map, lat, lng, radiusM]);
 
   return null;
 }

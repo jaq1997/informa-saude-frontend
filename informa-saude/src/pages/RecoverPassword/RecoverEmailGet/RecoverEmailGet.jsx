@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import './RecoverEmailGet.css';
 import { pedirCodigo } from '../../../api/api';
 
