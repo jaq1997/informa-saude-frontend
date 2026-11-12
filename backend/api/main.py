@@ -16,6 +16,8 @@ from .config import CORS_ORIGINS, EM_PRODUCAO, GOOGLE_CLIENT_ID
 from .database import get_db
 from .email import enviar_codigo_verificacao
 
+from .routers import dashboard
+
 logger = logging.getLogger(__name__)
 
 
@@ -33,6 +35,8 @@ app.add_middleware(
     allow_methods=["GET", "POST", "PATCH"],
     allow_headers=["Authorization", "Content-Type"],
 )
+
+app.include_router(dashboard.router)
 
 CODIGO_VALIDADE_MIN = 10
 MAX_TENTATIVAS = 5
