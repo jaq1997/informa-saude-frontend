@@ -1,4 +1,26 @@
+# Variáveis de ambiente e credenciais
 .env
+.env.*
+!.env.example
+!.env.test.example
+
+# Ambiente virtual Python
 .venv/
+venv/
+
+# Cache e arquivos compilados do Python
 __pycache__/
 *.pyc
+*.pyo
+
+# Cache e relatórios de testes
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Configurações locais do editor
+.vscode/
+.idea/
+
+# Arquivos temporários
+*.log
