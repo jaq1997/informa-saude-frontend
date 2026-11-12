@@ -213,6 +213,7 @@
   background: #004840c7;
 }
 
+.xp-bar--0 { --bar-height: 0%; }
 .xp-bar--25 { --bar-height: 25%; }
 .xp-bar--30 { --bar-height: 30%; }
 .xp-bar--35 { --bar-height: 35%; }

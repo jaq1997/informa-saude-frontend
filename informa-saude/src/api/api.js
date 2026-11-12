@@ -66,3 +66,36 @@ export const definirNovaSenha = (reset_token, nova_senha) =>
 
 export const alterarSenha = (senha_atual, nova_senha) =>
   chamar("/me/senha", { senha_atual, nova_senha }, { auth: true });
+
+
+export async function buscarDashboard() {
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    throw new Error("Usuário não autenticado.");
+  }
+
+  const resp = await fetch(`${API}/dashboard`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+
+  const dados = await resp.json().catch(() => ({}));
+
+  if (!resp.ok) {
+    const mensagem =
+      typeof dados.detail === "string"
+        ? dados.detail
+        : "Não foi possível carregar os dados do Dashboard.";
+
+    const erro = new Error(mensagem);
+    erro.status = resp.status;
+
+    throw erro;
+  }
+
+  return dados;
+}
