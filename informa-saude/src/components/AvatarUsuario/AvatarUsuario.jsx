@@ -41,6 +41,7 @@ export function AvatarUsuario({
       const urlTemporaria = URL.createObjectURL(arquivo);
       onAlterarFoto(urlTemporaria, arquivo);
     }
+    e.target.value = '';
   };
 
   const mostrarFoto = src && !erroImagem;

@@ -1,39 +1,18 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ChevronDown } from 'lucide-react';
-import fotoPerfil from '../../assets/images/foto-perfil.webp';
 import { BarraAcessibilidade } from '../BarraAcessibilidade/BarraAcessibilidade';
 import { AvatarUsuario } from '../AvatarUsuario/AvatarUsuario';
 import { Logo } from '../Logo/Logo';
-import { obterNomeUsuario } from '../../utils/usuario';
+import { obterNomeUsuario, resolverFoto } from '../../utils/usuario';
 import { useUser } from '../../context/UserContext';
-
-const resolverFoto = (avatarGoogle) => {
-  const fotoSalva = localStorage.getItem('informa-saude-foto-perfil');
-  if (fotoSalva === 'null') return null;
-  if (fotoSalva) return fotoSalva;
-  return avatarGoogle || fotoPerfil;
-};
 
 export function SystemNavbar() {
   const navigate = useNavigate();
   const { usuario } = useUser();
-  const nomeUsuario = obterNomeUsuario();
+  const nomeUsuario = usuario?.nome || obterNomeUsuario();
+  const fotoNavbar = resolverFoto(usuario?.avatar_url);
   const [modalSair, setModalSair] = useState(false);
-  const [fotoNavbar, setFotoNavbar] = useState(() => resolverFoto(usuario?.avatar_url));
-
-  useEffect(() => {
-    const atualizarFoto = () => setFotoNavbar(resolverFoto(usuario?.avatar_url));
-
-    window.addEventListener('storage', atualizarFoto);
-    window.addEventListener('foto-perfil-atualizada', atualizarFoto);
-    atualizarFoto();
-
-    return () => {
-      window.removeEventListener('storage', atualizarFoto);
-      window.removeEventListener('foto-perfil-atualizada', atualizarFoto);
-    };
-  }, [usuario?.avatar_url]);
 
   const confirmarSaida = () => {
     setModalSair(false);

@@ -1,10 +1,9 @@
-import fotoPerfil from '../assets/images/foto-perfil.webp';
+import { API } from '../api/api';
 
-export function resolverFoto(avatarGoogle) {
-  const fotoSalva = localStorage.getItem('informa-saude-foto-perfil');
-  if (fotoSalva === 'null') return null;
-  if (fotoSalva) return fotoSalva;
-  return avatarGoogle || fotoPerfil;
+export function resolverFoto(avatarUrl) {
+  if (!avatarUrl) return null;
+  if (avatarUrl.startsWith('/')) return `${API}${avatarUrl}`;
+  return avatarUrl;
 }
 
 export function obterNomeUsuario() {

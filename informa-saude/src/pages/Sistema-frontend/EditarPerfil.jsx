@@ -2,56 +2,96 @@ import { useEffect, useState } from 'react';
 import { SystemNavbar, ToastFeedback, FormInput, TituloPaginaSistema, CardPerfilSidebar } from '../../components';
 import { useUser } from '../../context/UserContext';
 import { obterNomeUsuario, obterEmailUsuario, resolverFoto } from '../../utils/usuario';
+import { buscarPerfil, atualizarPerfil, enviarFoto, removerFoto } from '../../api/api';
+
+const formatarTelefone = (valor) => {
+  const d = (valor || '').replace(/\D/g, '').slice(0, 11);
+  if (d.length <= 2) return d;
+  if (d.length <= 6) return `(${d.slice(0, 2)}) ${d.slice(2)}`;
+  if (d.length <= 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;
+  return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
+};
+
+const isoParaBr = (iso) => (iso ? iso.split('-').reverse().join('/') : '');
 
 export function EditarPerfil() {
-  const { usuario } = useUser();
+  const { usuario, atualizarUsuario } = useUser();
 
   const nomeAtual = usuario?.nome || obterNomeUsuario();
   const emailAtual = usuario?.email || obterEmailUsuario();
+  const foto = resolverFoto(usuario?.avatar_url);
 
-  const dadosIniciais = {
+  const [salvos, setSalvos] = useState({
     nome: nomeAtual,
     email: emailAtual,
-    telefone: '(51) 9 9999 - 9999',
-    dataNascimento: '23/03/1954',
-  };
+    telefone: '',
+    dataNascimento: '',
+  });
 
   const [nome, setNome] = useState(nomeAtual);
   const [email, setEmail] = useState(emailAtual);
-  const [telefone, setTelefone] = useState(dadosIniciais.telefone);
-  const [dataNascimento, setDataNascimento] = useState(dadosIniciais.dataNascimento);
+  const [telefone, setTelefone] = useState('');
+  const [dataNascimento, setDataNascimento] = useState('');
+  const [provider, setProvider] = useState('LOCAL');
   const [modoEdicao, setModoEdicao] = useState(false);
+  const [salvando, setSalvando] = useState(false);
   const [toastSucesso, setToastSucesso] = useState(false);
+  const [toastErro, setToastErro] = useState(null);
   const [toastFotoMsg, setToastFotoMsg] = useState(null);
-  const [foto, setFoto] = useState(() => resolverFoto(usuario?.avatar_url));
 
   useEffect(() => {
-    if (modoEdicao) return;
-    setNome(nomeAtual);
-    setEmail(emailAtual);
-  }, [nomeAtual, emailAtual]);
+    let ativo = true;
 
-  useEffect(() => {
-    const atualizarFoto = () => setFoto(resolverFoto(usuario?.avatar_url));
-
-    window.addEventListener('storage', atualizarFoto);
-    window.addEventListener('foto-perfil-atualizada', atualizarFoto);
-    atualizarFoto();
+    buscarPerfil()
+      .then((perfil) => {
+        if (!ativo) return;
+        const carregados = {
+          nome: perfil.nome || '',
+          email: perfil.email || '',
+          telefone: formatarTelefone(perfil.telefone),
+          dataNascimento: isoParaBr(perfil.data_nascimento),
+        };
+        setSalvos(carregados);
+        setNome(carregados.nome);
+        setEmail(carregados.email);
+        setTelefone(carregados.telefone);
+        setDataNascimento(carregados.dataNascimento);
+        setProvider(perfil.provider || 'LOCAL');
+        atualizarUsuario({
+          nome: perfil.nome,
+          email: perfil.email,
+          avatar_url: perfil.avatar_url,
+        });
+      })
+      .catch(() => {
+        if (ativo) setToastErro('Não foi possível carregar seus dados.');
+      });
 
     return () => {
-      window.removeEventListener('storage', atualizarFoto);
-      window.removeEventListener('foto-perfil-atualizada', atualizarFoto);
+      ativo = false;
     };
-  }, [usuario?.avatar_url]);
+  }, []);
 
-  const atualizarFotoPerfil = (novaFoto) => {
-    if (novaFoto) {
-      localStorage.setItem('informa-saude-foto-perfil', novaFoto);
-    } else {
-      localStorage.setItem('informa-saude-foto-perfil', 'null');
+  const handleAlterarFoto = async (urlTemporaria, arquivo) => {
+    try {
+      const atualizado = await enviarFoto(arquivo);
+      atualizarUsuario({ avatar_url: atualizado.avatar_url });
+      setToastFotoMsg('Foto de perfil atualizada!');
+    } catch (erro) {
+      setToastErro(erro.message || 'Não foi possível atualizar a foto.');
+    } finally {
+      URL.revokeObjectURL(urlTemporaria);
     }
-    setFoto(novaFoto);
-    window.dispatchEvent(new Event('foto-perfil-atualizada'));
+  };
+
+  const handleRemoverFoto = async () => {
+    try {
+      const atualizado = await removerFoto();
+      atualizarUsuario({ avatar_url: atualizado.avatar_url });
+      setToastFotoMsg('Foto removida com sucesso!');
+    } catch (erro) {
+      setToastErro(erro.message || 'Não foi possível remover a foto.');
+    }
   };
 
   const formatarDataNascimento = (valor) => {
@@ -61,17 +101,52 @@ export function EditarPerfil() {
     return valorFormatado;
   };
 
-  const handleSalvar = (e) => {
+  const handleSalvar = async (e) => {
     e.preventDefault();
-    setModoEdicao(false);
-    setToastSucesso(true);
+
+    if (dataNascimento.length !== 10) {
+      setToastErro('Informe a data de nascimento completa (dd/mm/aaaa).');
+      return;
+    }
+
+    setSalvando(true);
+    try {
+      const atualizado = await atualizarPerfil({
+        nome,
+        email,
+        telefone,
+        data_nascimento: dataNascimento,
+      });
+
+      const novosDados = {
+        nome: atualizado.nome,
+        email: atualizado.email,
+        telefone: formatarTelefone(atualizado.telefone),
+        dataNascimento: isoParaBr(atualizado.data_nascimento),
+      };
+
+      setSalvos(novosDados);
+      setNome(novosDados.nome);
+      setEmail(novosDados.email);
+      setTelefone(novosDados.telefone);
+      setDataNascimento(novosDados.dataNascimento);
+
+      atualizarUsuario({ nome: atualizado.nome, email: atualizado.email });
+
+      setModoEdicao(false);
+      setToastSucesso(true);
+    } catch (erro) {
+      setToastErro(erro.message || 'Não foi possível salvar.');
+    } finally {
+      setSalvando(false);
+    }
   };
 
   const handleCancelarEdicao = () => {
-    setNome(dadosIniciais.nome);
-    setEmail(dadosIniciais.email);
-    setTelefone(dadosIniciais.telefone);
-    setDataNascimento(dadosIniciais.dataNascimento);
+    setNome(salvos.nome);
+    setEmail(salvos.email);
+    setTelefone(salvos.telefone);
+    setDataNascimento(salvos.dataNascimento);
     setModoEdicao(false);
   };
 
@@ -81,6 +156,13 @@ export function EditarPerfil() {
     const timeoutId = setTimeout(() => setToastSucesso(false), 5000);
     return () => clearTimeout(timeoutId);
   }, [toastSucesso]);
+
+  useEffect(() => {
+    if (!toastErro) return undefined;
+
+    const timeoutId = setTimeout(() => setToastErro(null), 5000);
+    return () => clearTimeout(timeoutId);
+  }, [toastErro]);
 
   return (
     <div className="bg-light min-vh-100 pb-5">
@@ -100,14 +182,8 @@ export function EditarPerfil() {
               email={email}
               foto={foto}
               podeEditar
-              onAlterarFoto={(novaUrl) => {
-                atualizarFotoPerfil(novaUrl);
-                setToastFotoMsg('Foto de perfil atualizada!');
-              }}
-              onRemoverFoto={() => {
-                atualizarFotoPerfil(null);
-                setToastFotoMsg('Foto removida com sucesso!');
-              }}
+              onAlterarFoto={handleAlterarFoto}
+              onRemoverFoto={handleRemoverFoto}
             />
           </div>
 
@@ -147,7 +223,7 @@ export function EditarPerfil() {
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      disabled={!modoEdicao}
+                      disabled={!modoEdicao || provider === 'GOOGLE'}
                       required
                     />
                   </div>
@@ -157,8 +233,9 @@ export function EditarPerfil() {
                       id="telefone"
                       label="Telefone"
                       type="tel"
+                      placeholder="(00) 00000-0000"
                       value={telefone}
-                      onChange={(e) => setTelefone(e.target.value)}
+                      onChange={(e) => setTelefone(formatarTelefone(e.target.value))}
                       disabled={!modoEdicao}
                       required
                     />
@@ -181,13 +258,18 @@ export function EditarPerfil() {
 
                 {modoEdicao && (
                   <div className="is-modal-actions mt-4">
-                    <button type="submit" className="is-btn is-btn--profile is-btn--orange fs-6">
-                      Atualizar cadastro
+                    <button
+                      type="submit"
+                      className="is-btn is-btn--profile is-btn--orange fs-6"
+                      disabled={salvando}
+                    >
+                      {salvando ? 'Salvando...' : 'Atualizar cadastro'}
                     </button>
                     <button
                       type="button"
                       className="is-btn is-btn--profile is-btn--outline-green fs-6"
                       onClick={handleCancelarEdicao}
+                      disabled={salvando}
                     >
                       Cancelar
                     </button>
@@ -205,6 +287,14 @@ export function EditarPerfil() {
         titulo="Perfil atualizado"
         mensagem="Seus dados foram atualizados com sucesso no sistema."
         tipo="sucesso"
+      />
+
+      <ToastFeedback
+        visivel={!!toastErro}
+        onClose={() => setToastErro(null)}
+        titulo="Não foi possível salvar"
+        mensagem={toastErro}
+        tipo="erro"
       />
 
       <ToastFeedback

@@ -1,7 +1,8 @@
 from sqlalchemy import (
     BigInteger, Boolean, Column, Date, DateTime, ForeignKey, Index,
-    Integer, SmallInteger, String, Text, func,
+    Integer, LargeBinary, SmallInteger, String, Text, func,
 )
+from sqlalchemy.orm import deferred
 
 from .database import Base
 
@@ -19,6 +20,8 @@ class User(Base):
     provider = Column(String(20), nullable=False, default="LOCAL")
     provider_id = Column(String(255))
     avatar_url = Column(Text)
+    avatar_dados = deferred(Column(LargeBinary))
+    avatar_tipo = Column(String(20))
     token_version = Column(Integer, nullable=False, default=0, server_default="0")
     email_verificado = Column(Boolean, nullable=False, default=False, server_default="false")
     criado_em = Column(DateTime(timezone=True), server_default=func.now())

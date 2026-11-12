@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../../context/UserContext';
 import { User, Settings, KeyRound, LogOut } from 'lucide-react';
@@ -12,38 +12,39 @@ import {
   ModalConfirmacao
 } from '../../components';
 import { resolverFoto } from '../../utils/usuario';
+import { enviarFoto, removerFoto } from '../../api/api';
 
 export function MeuPerfil() {
   const navigate = useNavigate();
-  const { usuario, sair } = useUser();
+  const { usuario, atualizarUsuario, sair } = useUser();
   const nomeUsuario = usuario.nome;
   const emailUsuario = usuario.email;
+  const foto = resolverFoto(usuario?.avatar_url);
   const [modalSair, setModalSair] = useState(false);
   const [modalSenha, setModalSenha] = useState(false);
-  const [foto, setFoto] = useState(() => resolverFoto(usuario?.avatar_url));
   const [toastMsg, setToastMsg] = useState(null);
+  const [toastErro, setToastErro] = useState(null);
 
-  useEffect(() => {
-    const atualizarFoto = () => setFoto(resolverFoto(usuario?.avatar_url));
-
-    window.addEventListener('storage', atualizarFoto);
-    window.addEventListener('foto-perfil-atualizada', atualizarFoto);
-    atualizarFoto();
-
-    return () => {
-      window.removeEventListener('storage', atualizarFoto);
-      window.removeEventListener('foto-perfil-atualizada', atualizarFoto);
-    };
-  }, [usuario?.avatar_url]);
-
-  const atualizarFotoPerfil = (novaFoto) => {
-    if (novaFoto) {
-      localStorage.setItem('informa-saude-foto-perfil', novaFoto);
-    } else {
-      localStorage.setItem('informa-saude-foto-perfil', 'null');
+  const handleAlterarFoto = async (urlTemporaria, arquivo) => {
+    try {
+      const atualizado = await enviarFoto(arquivo);
+      atualizarUsuario({ avatar_url: atualizado.avatar_url });
+      setToastMsg('Foto de perfil atualizada!');
+    } catch (erro) {
+      setToastErro(erro.message || 'Não foi possível atualizar a foto.');
+    } finally {
+      URL.revokeObjectURL(urlTemporaria);
     }
-    setFoto(novaFoto);
-    window.dispatchEvent(new Event('foto-perfil-atualizada'));
+  };
+
+  const handleRemoverFoto = async () => {
+    try {
+      const atualizado = await removerFoto();
+      atualizarUsuario({ avatar_url: atualizado.avatar_url });
+      setToastMsg('Foto removida com sucesso!');
+    } catch (erro) {
+      setToastErro(erro.message || 'Não foi possível remover a foto.');
+    }
   };
 
   const handleConfirmarSair = () => {
@@ -69,14 +70,8 @@ export function MeuPerfil() {
               email={emailUsuario}
               foto={foto}
               podeEditar
-              onAlterarFoto={(novaUrl) => {
-                atualizarFotoPerfil(novaUrl);
-                setToastMsg('Foto de perfil atualizada!');
-              }}
-              onRemoverFoto={() => {
-                atualizarFotoPerfil(null);
-                setToastMsg('Foto removida com sucesso!');
-              }}
+              onAlterarFoto={handleAlterarFoto}
+              onRemoverFoto={handleRemoverFoto}
             />
           </div>
 
@@ -141,6 +136,14 @@ export function MeuPerfil() {
         titulo="Atualização"
         mensagem={toastMsg}
         tipo="sucesso"
+      />
+
+      <ToastFeedback
+        visivel={!!toastErro}
+        onClose={() => setToastErro(null)}
+        titulo="Não foi possível salvar"
+        mensagem={toastErro}
+        tipo="erro"
       />
     </div>
   );
