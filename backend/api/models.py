@@ -4,6 +4,7 @@ from sqlalchemy import (
 )
 
 from .database import Base
+from sqlalchemy import UniqueConstraint
 
 
 class User(Base):
@@ -75,3 +76,72 @@ class ResultadoQuestionario(Base):
     pontuacao = Column(Text, nullable=False)        # JSON em string dos pontos por jornada
     jornada_recomendada = Column(String(50), nullable=False)  # "cardiaca", "sono", "respiratoria"
     criado_em = Column(DateTime(timezone=True), server_default=func.now())
+
+class JornadaUsuario(Base):
+    __tablename__ = "jornadas_usuario"
+
+    __table_args__ = (
+        UniqueConstraint(
+            "usuario_id",
+            "codigo",
+            name="uq_jornada_usuario_codigo",
+        ),
+    )
+
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
+
+    usuario_id = Column(
+        BigInteger,
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+
+    codigo = Column(String(80), nullable=False)
+    nome = Column(String(120), nullable=False)
+
+    iniciada_em = Column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False,
+    )
+
+    concluida_em = Column(DateTime(timezone=True))
+
+class AtividadeAprendizado(Base):
+    __tablename__ = "atividades_aprendizado"
+
+    __table_args__ = (
+        UniqueConstraint(
+            "usuario_id",
+            "referencia",
+            name="uq_atividade_usuario_referencia",
+        ),
+    )
+
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
+
+    usuario_id = Column(
+        BigInteger,
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+
+    jornada_id = Column(
+        BigInteger,
+        ForeignKey("jornadas_usuario.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+
+    referencia = Column(String(120), nullable=False)
+
+    xp = Column(Integer, nullable=False, default=0)
+    minutos = Column(Integer, nullable=False, default=0)
+
+    concluida_em = Column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False,
+    )

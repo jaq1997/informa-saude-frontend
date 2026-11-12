@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 from typing import Annotated
 
 from pydantic import AfterValidator, BaseModel, EmailStr, Field
@@ -122,3 +122,39 @@ class QuestionarioResultado(BaseModel):
     jornadas_empatadas: list[str] = []
     persistido: bool = False
     mensagem: str
+
+class JornadaCreate(BaseModel):
+    codigo: str = Field(min_length=1, max_length=80)
+    nome: str = Field(min_length=1, max_length=120)
+
+class JornadaResponse(BaseModel):
+    id: int
+    codigo: str
+    nome: str
+    iniciada_em: datetime
+    concluida_em: datetime | None = None
+
+    model_config = {"from_attributes": True}
+
+class AtividadeCreate(BaseModel):
+    jornada_id: int = Field(gt=0)
+    referencia: str = Field(min_length=1, max_length=120)
+    xp: int = Field(ge=0, le=10000)
+    minutos: int = Field(ge=0, le=1440)
+
+class AtividadeResponse(BaseModel):
+    id: int
+    jornada_id: int
+    referencia: str
+    xp: int
+    minutos: int
+    concluida_em: datetime
+
+    model_config = {"from_attributes": True}
+
+class DashboardResponse(BaseModel):
+    diasAprendidos: int
+    progressoSemanal: list[bool]
+    xpHistorico: list[int]
+    jornadas: int
+    minutos: int
