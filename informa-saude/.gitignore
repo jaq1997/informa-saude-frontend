@@ -37,5 +37,9 @@ jornadas-conteudos/
 src/assets/images/*.jpg
 src/assets/images/*.jpeg
 src/assets/images/*.png
+
 !src/assets/images/hero-care-vertical.jpg
 !src/assets/images/hero-2-vertical.jpg
+
+# Arquivos de configuração de ambiente
+.env

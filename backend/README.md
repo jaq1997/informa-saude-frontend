@@ -1,0 +1,545 @@
+# Informa-Saúde — Backend
+
+API REST em **FastAPI** para autenticação e gerenciamento de contas de usuários do Informa-Saúde. Ela cuida de:
+
+- cadastro com **confirmação de e-mail por código** e login (com e-mail e senha, ou com a conta do Google);
+- recuperação de senha por um **código enviado por e-mail** (o envio é feito pelo [Brevo](https://www.brevo.com));
+- troca de senha, com **e-mail de aviso** ao dono da conta;
+- proteções contra abuso (limite de tentativas).
+
+> **Nunca usou um projeto assim?** Siga a seção [Como rodar (passo a passo)](#como-rodar-passo-a-passo) na ordem. Se algo der errado, veja [Problemas comuns](#problemas-comuns).
+
+## Índice
+
+- [Funcionalidades](#funcionalidades)
+- [Tecnologias](#tecnologias)
+- [Estrutura do projeto](#estrutura-do-projeto)
+- [Antes de começar](#antes-de-começar)
+- [Como rodar (passo a passo)](#como-rodar-passo-a-passo)
+- [Configurando o envio de e-mail (Brevo)](#configurando-o-envio-de-e-mail-brevo)
+- [Variáveis de ambiente](#variáveis-de-ambiente)
+- [Banco de dados](#banco-de-dados)
+- [Endpoints](#endpoints)
+- [Testando a API](#testando-a-api)
+- [Confirmação de e-mail no cadastro](#confirmação-de-e-mail-no-cadastro)
+- [Recuperação de senha](#recuperação-de-senha)
+- [Segurança](#segurança)
+- [Conectando o front-end](#conectando-o-front-end)
+- [Problemas comuns](#problemas-comuns)
+- [Produção](#produção)
+
+## Funcionalidades
+
+- Cadastro e login com e-mail e senha (a senha é guardada com hash bcrypt, nunca em texto puro)
+- Confirmação de e-mail no cadastro, com código de 6 dígitos enviado por e-mail (via Brevo)
+- Login com Google (recusado se o e-mail já está vinculado a outra conta do Google)
+- Recuperação de senha em 3 passos, com código de 6 dígitos enviado por e-mail (via Brevo)
+- Autenticação por JWT (um "crachá" digital que o usuário recebe ao entrar), com sessões invalidadas quando a senha muda
+- E-mail de aviso de segurança sempre que a senha é alterada (por recuperação ou pela troca logado)
+- Perfil do usuário (`/me`) e troca de senha
+- Limite de tentativas em login, cadastro e códigos de verificação, com contagem atômica (sem brecha para requisições simultâneas)
+- Cooldown de 1 minuto entre códigos de confirmação para o mesmo e-mail, inclusive no `/register`
+- IP real do cliente atrás de proxy (variável `PROXIES_CONFIAVEIS`), com IPv6 agrupado por bloco /64
+- Documentação interativa automática em `/docs` (desativada em produção)
+
+## Tecnologias
+
+- Python 3.10 ou mais novo
+- FastAPI e Uvicorn (a API e o servidor que a executa)
+- PostgreSQL 11 ou mais novo, com SQLAlchemy (o banco de dados)
+- PyJWT e Passlib/bcrypt (login seguro)
+- google-auth (login com Google)
+- Pydantic v2 com `email-validator` (validação dos dados recebidos)
+- httpx (comunicação com a API do Brevo para enviar e-mails)
+- python-dotenv (leitura do arquivo `.env`)
+
+## Estrutura do projeto
+
+```
+backend-python/
+├── api/
+│   ├── main.py            # cria a aplicação, CORS e registra as rotas
+│   ├── config.py          # lê as configurações do arquivo .env
+│   ├── database.py        # conexão com o PostgreSQL
+│   ├── models.py          # as tabelas do banco (SQLAlchemy)
+│   ├── schemas.py         # formato dos dados que a API aceita e devolve
+│   ├── security.py        # senhas, tokens JWT e códigos de verificação
+│   ├── regras.py          # constantes: limites de tentativas, validade dos códigos, mensagens
+│   ├── limites.py         # limite de tentativas por e-mail, IP e usuário
+│   ├── codigos.py         # criação e envio dos códigos de verificação
+│   ├── dependencias.py    # dependência que identifica o usuário logado pelo token
+│   ├── email.py           # envio de e-mails pela API do Brevo
+│   └── routers/
+│       ├── auth.py        # login, Google e recuperação de senha
+│       ├── cadastro.py    # cadastro e confirmação de e-mail
+│       └── usuarios.py    # perfil e troca de senha
+├── requirements.txt       # lista das bibliotecas do projeto
+└── .env                   # suas configurações locais (NÃO vai para o Git)
+```
+
+## Antes de começar
+
+Você precisa ter instalado ou criado:
+
+| O que | Para quê | Onde conseguir |
+| --- | --- | --- |
+| **Python 3.10+** | rodar o projeto | https://www.python.org/downloads/ |
+| **PostgreSQL 11+** | guardar os dados | https://www.postgresql.org/download/ |
+| **Git** | baixar o projeto | https://git-scm.com/downloads |
+| **Conta no Brevo** | enviar os e-mails de código | https://www.brevo.com |
+| **Client ID do Google** | login com Google | https://console.cloud.google.com/apis/credentials |
+
+> Dica para Windows: ao instalar o Python, marque a opção **"Add Python to PATH"**.
+
+## Como rodar (passo a passo)
+
+### 1. Baixar o projeto
+
+```
+git clone https://github.com/andersoncrespani/backend-python.git
+cd backend-python
+```
+
+### 2. Criar o ambiente virtual
+
+O ambiente virtual (`venv`) é uma "caixinha" onde ficam só as bibliotecas deste projeto, para não misturar com o resto do computador.
+
+```
+python -m venv venv
+```
+
+Agora **ative** o ambiente (precisa fazer isso toda vez que abrir um terminal novo):
+
+- **Windows (PowerShell):** `.\venv\Scripts\activate`
+- **Windows (Prompt de Comando):** `venv\Scripts\activate.bat`
+- **Mac / Linux:** `source venv/bin/activate`
+
+Quando der certo, aparece `(venv)` no começo da linha do terminal.
+
+> No PowerShell, se aparecer um erro dizendo que a execução de scripts está desabilitada, rode uma vez: `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` e tente ativar de novo.
+
+### 3. Instalar as bibliotecas
+
+Com o `(venv)` ativo:
+
+```
+pip install -r requirements.txt
+```
+
+Se o projeto ainda não tiver o `requirements.txt`, instale manualmente:
+
+```
+pip install fastapi "uvicorn[standard]" sqlalchemy psycopg2-binary python-dotenv pyjwt "passlib[bcrypt]" google-auth requests email-validator httpx
+```
+
+### 4. Criar o banco de dados
+
+Crie um banco vazio no PostgreSQL (pelo pgAdmin, ou pelo terminal):
+
+```
+psql -U postgres -c "CREATE DATABASE nome_do_seu_banco;"
+```
+
+Depois crie as tabelas rodando o SQL da seção [Banco de dados](#banco-de-dados). No pgAdmin, abra o banco, clique em *Query Tool*, cole o SQL e execute.
+
+### 5. Configurar o envio de e-mail
+
+Siga a seção [Configurando o envio de e-mail (Brevo)](#configurando-o-envio-de-e-mail-brevo). É rápido, e sem isso os códigos de cadastro e de recuperação de senha não chegam.
+
+### 6. Criar o arquivo `.env`
+
+Na pasta principal do projeto (a mesma do `README.md`), crie um arquivo chamado **`.env`** (com o ponto na frente, sem extensão) e preencha conforme [Variáveis de ambiente](#variáveis-de-ambiente).
+
+### 7. Ligar a API
+
+Com o PostgreSQL funcionando e o `(venv)` ativo:
+
+```
+uvicorn api.main:app --reload
+```
+
+Se aparecer `Application startup complete`, deu certo. A API fica em `http://localhost:8000` e a documentação interativa em `http://localhost:8000/docs`.
+
+## Configurando o envio de e-mail (Brevo)
+
+A API envia os e-mails (códigos de confirmação, de recuperação de senha e avisos de segurança) pelo **Brevo**, um serviço de e-mail. São três passos:
+
+**1. Criar a conta**
+Crie uma conta gratuita em https://www.brevo.com e confirme o seu e-mail.
+
+**2. Gerar a chave de API**
+No painel do Brevo, abra o menu da sua conta e vá em **SMTP & API → API Keys**. Clique em gerar uma nova chave, dê um nome (por exemplo, `informa-saude`) e copie. Ela começa com `xkeysib-`. Guarde em um lugar seguro, porque ela só é mostrada uma vez. Esta chave vai no `.env` como `BREVO_API_KEY`.
+
+**3. Validar o remetente**
+O remetente é o endereço que aparece no "De:" do e-mail. O Brevo só envia por endereços que você comprovou ser seus:
+
+1. Vá em **Senders, Domains & Dedicated IPs → Senders**.
+2. Clique em *Add a sender*, informe o nome e o e-mail.
+3. O Brevo manda uma mensagem de confirmação para esse e-mail. Abra e confirme.
+4. Use **exatamente esse e-mail** no `EMAIL_REMETENTE` do `.env`.
+
+> **Dica para os e-mails não caírem no spam:** prefira um endereço de domínio próprio (como `contato@seusite.com.br`) e configure o SPF e o DKIM do domínio no painel do Brevo. Remetentes `@gmail.com`, `@hotmail.com` ou `@outlook.com` costumam ser tratados como spam ou recusados.
+
+## Variáveis de ambiente
+
+São as configurações do projeto, guardadas no arquivo `.env`.
+
+| Variável | Obrigatória | O que é |
+| --- | --- | --- |
+| `DB_USER` | sim | Usuário do PostgreSQL |
+| `DB_PASSWORD` | sim | Senha do PostgreSQL |
+| `DB_NAME` | sim | Nome do banco que você criou |
+| `DB_HOST` | não | Onde está o banco. Padrão: `localhost` |
+| `DB_PORT` | não | Porta do banco. Padrão: `5432` |
+| `SECRET_KEY` | sim | Chave secreta usada nos tokens e códigos. **Mínimo de 32 caracteres** |
+| `JWT_ALGORITHM` | não | Padrão: `HS256` |
+| `JWT_EXPIRATION_MINUTES` | não | Por quantos minutos o login vale. Padrão: `60` |
+| `GOOGLE_CLIENT_ID` | sim | ID do cliente OAuth do Google |
+| `BREVO_API_KEY` | sim | Chave de API do Brevo (começa com `xkeysib-`) |
+| `EMAIL_REMETENTE` | sim | E-mail remetente, **já validado no Brevo** |
+| `NOME_REMETENTE` | não | Nome que aparece ao lado do remetente. Padrão: `Informa-Saúde` |
+| `CORS_ORIGINS` | não | Endereços do front-end que podem usar a API, separados por vírgula e sem barra no final. Padrão: localhost nas portas 5173 e 3000 |
+| `AMBIENTE` | não | `desenvolvimento` (padrão) ou `producao`. Em produção o `/docs` fica escondido |
+| `PROXIES_CONFIAVEIS` | não | Quantos proxies confiáveis ficam na frente da API (`0` = acesso direto, sem proxy). Padrão: `0`. Em produção é obrigatória. Veja [Produção](#produção) |
+
+Exemplo de `.env`:
+
+```
+AMBIENTE=desenvolvimento
+PROXIES_CONFIAVEIS=0
+
+DB_USER=postgres
+DB_PASSWORD=sua_senha
+DB_NAME=nome_do_seu_banco
+DB_HOST=localhost
+DB_PORT=5432
+
+SECRET_KEY=gere_uma_chave_com_pelo_menos_32_caracteres
+JWT_EXPIRATION_MINUTES=60
+
+GOOGLE_CLIENT_ID=seu-client-id.apps.googleusercontent.com
+
+BREVO_API_KEY=xkeysib-cole-sua-chave-aqui
+EMAIL_REMETENTE=contato@seudominio.com.br
+NOME_REMETENTE=Informa-Saúde
+
+CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000
+```
+
+Para gerar uma `SECRET_KEY` segura, rode no terminal:
+
+```
+python -c "import secrets; print(secrets.token_urlsafe(48))"
+```
+
+> Depois de mudar o `.env`, **pare e ligue a API de novo** (`Ctrl+C` e depois `uvicorn api.main:app --reload`). Ela só lê o arquivo quando inicia, e o `--reload` não percebe mudanças no `.env`.
+
+> Rodando localmente com `uvicorn` direto, deixe `PROXIES_CONFIAVEIS=0`. Com valor maior que 0 e sem proxy na frente, a API avisa no terminal que o `X-Forwarded-For` veio com menos IPs que o esperado e usa o IP da conexão.
+
+## Banco de dados
+
+**Banco novo: SQL para criar as tabelas**
+
+```sql
+CREATE TABLE users (
+    id                BIGSERIAL PRIMARY KEY,
+    nome              VARCHAR(120) NOT NULL,
+    email             VARCHAR(180) NOT NULL UNIQUE,
+    senha_hash        VARCHAR(72),
+    sexo              VARCHAR(50)  NOT NULL,
+    data_nascimento   DATE,
+    telefone          VARCHAR(30) UNIQUE,
+    provider          VARCHAR(20)  NOT NULL DEFAULT 'LOCAL',
+    provider_id       VARCHAR(255),
+    avatar_url        TEXT,
+    token_version     INTEGER      NOT NULL DEFAULT 0,
+    email_verificado  BOOLEAN      NOT NULL DEFAULT FALSE,
+    criado_em         TIMESTAMPTZ  DEFAULT now()
+);
+
+CREATE UNIQUE INDEX idx_users_email_lower ON users (lower(email));
+
+CREATE TABLE codigos_verificacao (
+    id           BIGSERIAL PRIMARY KEY,
+    user_id      BIGINT      NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    codigo_hash  VARCHAR(64) NOT NULL,
+    finalidade   VARCHAR(30) NOT NULL DEFAULT 'RECUPERAR_SENHA',
+    tentativas   SMALLINT    NOT NULL DEFAULT 0,
+    usado        BOOLEAN     NOT NULL DEFAULT FALSE,
+    expira_em    TIMESTAMPTZ NOT NULL,
+    criado_em    TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE INDEX idx_codigos_user_finalidade_usado
+    ON codigos_verificacao (user_id, finalidade, usado);
+
+CREATE TABLE limites_requisicao (
+    id        BIGSERIAL PRIMARY KEY,
+    acao      VARCHAR(30)  NOT NULL,
+    chave     VARCHAR(200) NOT NULL,
+    criado_em TIMESTAMPTZ  NOT NULL DEFAULT now()
+);
+
+CREATE INDEX ix_limites_acao_chave_criado_em ON limites_requisicao (acao, chave, criado_em);
+CREATE INDEX ix_limites_criado_em ON limites_requisicao (criado_em);
+```
+
+**Banco que já existe: adicionar a confirmação de e-mail**
+
+Rode uma vez. O `UPDATE` marca as contas que já existem como verificadas, para elas continuarem entrando normalmente.
+
+```sql
+ALTER TABLE users ADD COLUMN email_verificado BOOLEAN NOT NULL DEFAULT FALSE;
+UPDATE users SET email_verificado = TRUE;
+```
+
+**Banco que já existe: adicionar a versão do token e os índices do limitador**
+
+Pode rodar mais de uma vez, não faz nada se já existir. O SQLAlchemy não altera tabelas que já existem, então os índices definidos no `models.py` só aparecem em banco novo.
+
+```sql
+ALTER TABLE users ADD COLUMN IF NOT EXISTS token_version INTEGER NOT NULL DEFAULT 0;
+
+CREATE INDEX IF NOT EXISTS ix_limites_acao_chave_criado_em ON limites_requisicao (acao, chave, criado_em);
+CREATE INDEX IF NOT EXISTS ix_limites_criado_em ON limites_requisicao (criado_em);
+```
+
+**Limpeza opcional de cadastros nunca confirmados**
+
+```sql
+DELETE FROM users
+WHERE email_verificado = FALSE
+  AND criado_em < now() - interval '7 days';
+```
+
+**Zerar o contador de tentativas (útil para testes)**
+
+O limitador guarda cada tentativa na tabela `limites_requisicao`. Para liberar uma ação sem esperar a janela passar:
+
+```sql
+DELETE FROM limites_requisicao WHERE acao = 'REGISTER';
+```
+
+Troque `REGISTER` por `LOGIN`, `PEDIR`, `CODIGO`, `EMAIL_CODIGO`, `EMAIL_PEDIR` ou `SENHA_ATUAL` conforme a ação. Sem o `WHERE`, apaga o contador de todas.
+
+**Valores usados na coluna `finalidade`**
+
+- `RECUPERAR_SENHA`: código da recuperação de senha.
+- `VERIFICAR_EMAIL`: código da confirmação de e-mail no cadastro.
+
+## Endpoints
+
+Endpoint é cada "endereço" da API. Os que precisam de login pedem o token no cabeçalho `Authorization: Bearer SEU_TOKEN`.
+
+| Método | Rota | Precisa de | O que faz |
+| --- | --- | --- | --- |
+| `POST` | `/register` | nada | Cria a conta (não verificada) e envia o código de confirmação por e-mail. Responde `429` se já foi enviado um código para o e-mail há menos de 1 minuto |
+| `POST` | `/register/verificar` | nada | Confere o código e marca o e-mail como verificado |
+| `POST` | `/register/reenviar` | nada | Envia um novo código de confirmação |
+| `POST` | `/login` | nada | Login com e-mail e senha; devolve o token (recusa contas não verificadas com `403`) |
+| `POST` | `/auth/google` | nada | Login com Google; cria a conta se não existir (recusa com `401` se o e-mail está vinculado a outra conta do Google) |
+| `POST` | `/auth/recuperar/pedir` | nada | Envia um código de 6 dígitos por e-mail |
+| `POST` | `/auth/recuperar/verificar` | nada | Confere o código e devolve um `reset_token` |
+| `POST` | `/auth/recuperar/nova-senha` | `reset_token` | Define a nova senha e envia um e-mail de aviso |
+| `GET` | `/me` | Bearer | Dados do usuário logado |
+| `POST` | `/me/senha` | Bearer | Troca a senha estando logado, devolve um novo token e envia um e-mail de aviso |
+
+## Testando a API
+
+O jeito mais fácil é pela documentação interativa, sem escrever código:
+
+1. Com a API ligada, abra http://localhost:8000/docs no navegador.
+2. Clique na rota que quer testar (por exemplo, `POST /register`).
+3. Clique em **Try it out**, preencha o corpo (**apague os textos de exemplo e coloque valores reais**) e clique em **Execute**.
+4. A resposta aparece logo abaixo.
+
+Também dá para testar pelo terminal com `curl`:
+
+**Cadastro** (envia o código para o e-mail informado)
+
+```
+curl -X POST http://localhost:8000/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "nome": "Maria Silva",
+    "email": "maria@exemplo.com",
+    "senha": "minhasenha123",
+    "sexo": "Feminino",
+    "data_nascimento": "1990-05-20",
+    "telefone": "51999999999"
+  }'
+```
+
+**Confirmar o e-mail** (use o código que chegou)
+
+```
+curl -X POST http://localhost:8000/register/verificar \
+  -H "Content-Type: application/json" \
+  -d '{"email": "maria@exemplo.com", "codigo": "123456"}'
+```
+
+**Login** (só funciona depois de confirmar o e-mail)
+
+```
+curl -X POST http://localhost:8000/login \
+  -H "Content-Type: application/json" \
+  -d '{"email": "maria@exemplo.com", "senha": "minhasenha123"}'
+```
+
+Resposta:
+
+```
+{ "access_token": "eyJhbGciOi...", "token_type": "bearer" }
+```
+
+**Dados do usuário logado**
+
+```
+curl http://localhost:8000/me -H "Authorization: Bearer SEU_TOKEN"
+```
+
+```
+{ "id": 1, "nome": "Maria Silva", "email": "maria@exemplo.com", "avatar_url": null }
+```
+
+**Testando o cooldown do cadastro**
+
+1. Faça `POST /register` com um e-mail **novo**. Deve dar `201`.
+2. Repita com o mesmo e-mail em menos de 1 minuto. Deve dar `429` com a mensagem "Aguarde 1 minuto antes de pedir um novo código".
+3. Se aparecer "Muitas tentativas. Tente novamente em 60 minutos", é o limite por IP (10 cadastros por hora) e não o cooldown. Zere o contador com o SQL da seção [Banco de dados](#banco-de-dados).
+
+## Confirmação de e-mail no cadastro
+
+O fluxo tem 3 passos, nesta ordem:
+
+```
+Cadastro → recebo um código por e-mail → digito o código → conta liberada para entrar
+```
+
+1. `POST /register` com os dados da conta.
+   A conta é criada como **não verificada** e a API envia por e-mail um código de **6 dígitos**, que vale por **10 minutos**.
+2. `POST /register/verificar` com `{"email": "...", "codigo": "123456"}`.
+   Se o código estiver certo, o e-mail passa a ser verificado e o login é liberado.
+3. `POST /login` com e-mail e senha, como de costume.
+
+**Bom saber**
+
+- Contas locais **não verificadas** não conseguem entrar. O `/login` responde `403` com a mensagem pedindo a confirmação do e-mail.
+- Quem fechou a tela antes de digitar o código pode **refazer o cadastro com o mesmo e-mail**. Como a conta ainda não foi verificada, os dados são atualizados e um código novo é enviado, e o código antigo deixa de valer. Se o e-mail já estiver verificado, o cadastro é recusado.
+- Para evitar que alguém use o `/register` para disparar e-mails em série para a caixa de outra pessoa, refazer o cadastro de um e-mail não verificado só é aceito depois de 1 minuto do último código. Antes disso, a resposta é `429`.
+- `POST /register/reenviar` com `{"email": "..."}` envia um novo código. O envio só acontece se a conta existir, ainda não estiver verificada e se já passou 1 minuto do último código. A resposta é sempre a mesma, para não revelar quais e-mails têm conta.
+- Cada código aceita no máximo 5 tentativas erradas. Depois disso é preciso pedir um novo.
+- **Login com Google** e **redefinição de senha** também marcam o e-mail como verificado, porque os dois já provam que a pessoa controla a caixa de e-mail.
+- No front-end, depois de `/register` a tela deve pedir o código e chamar `/register/verificar`. Só então faz o login.
+
+## Recuperação de senha
+
+O fluxo tem 3 passos, nesta ordem:
+
+```
+Esqueci a senha → recebo um código por e-mail → digito o código → crio a nova senha
+```
+
+1. `POST /auth/recuperar/pedir` com `{"email": "..."}`.
+   A API envia por e-mail um código de **6 dígitos**, que vale por **10 minutos**. A resposta é sempre a mesma, exista o e-mail ou não (assim ninguém descobre quem tem conta).
+2. `POST /auth/recuperar/verificar` com `{"email": "...", "codigo": "123456"}`.
+   Se o código estiver certo, devolve um `reset_token` válido por 15 minutos.
+3. `POST /auth/recuperar/nova-senha` com `{"reset_token": "...", "nova_senha": "..."}`.
+   O `reset_token` só funciona uma vez. Ao trocar a senha, todas as sessões abertas são encerradas e o dono da conta recebe um e-mail avisando.
+
+**Bom saber**
+
+- O e-mail só é enviado se a conta existir **e** se já passou 1 minuto desde o último pedido. Fora disso a API responde "ok" sem enviar nada, de propósito.
+- Cada código aceita no máximo 5 tentativas erradas. Depois disso é preciso pedir um novo.
+- Redefinir a senha também marca o e-mail como verificado.
+
+## Segurança
+
+- **Senhas** com hash bcrypt, entre 8 e 72 bytes (acentos e emojis contam mais de 1).
+- **Códigos de verificação** guardados com HMAC, com validade de 10 minutos e no máximo 5 tentativas por código.
+- **Confirmação de e-mail** obrigatória para contas locais antes do primeiro login.
+- **Sessões invalidadas** quando a senha muda (cada usuário tem um `token_version` que sobe a cada troca, e tokens de versão antiga dão `401`), e `reset_token` de uso único.
+- **Aviso por e-mail** quando a senha é alterada, tanto pela recuperação quanto pela troca logado.
+- **Login com Google** só vincula a conta pelo identificador do Google (`sub`). Se o e-mail já está ligado a outra conta do Google, o login é recusado.
+- **Sem vazamento de dados:** a recuperação de senha e o reenvio de código respondem igual para e-mails existentes e inexistentes, e o login leva o mesmo tempo nos dois casos.
+- **IP real do cliente** lido do `X-Forwarded-For` contando a partir do fim da lista, conforme `PROXIES_CONFIAVEIS`, para ninguém conseguir forjar o IP. Endereços IPv6 são agrupados pelo bloco /64, para que trocar de endereço dentro do mesmo bloco não escape do limite.
+- **Limite de tentativas atômico:** a checagem e o registro de cada tentativa acontecem sob um lock do PostgreSQL por chave, então requisições simultâneas não passam do limite. A janela de tempo usa o relógio do banco, e a limpeza de registros antigos roda de forma ocasional.
+- **Limite de tentativas** (resposta `429`, com o cabeçalho `Retry-After` dizendo quanto esperar). Os valores ficam em `api/regras.py`:
+
+| Ação | Limite |
+| --- | --- |
+| Login com senha errada | 5 por e-mail e 20 por IP, em 15 min |
+| Pedir código de recuperação | 5 por e-mail e 10 por IP, em 1 h |
+| Cadastro | 10 por IP, em 1 h |
+| Código de recuperação errado | 10 por e-mail e 30 por IP, em 1 h |
+| Código de confirmação de e-mail errado | 10 por e-mail e 30 por IP, em 1 h |
+| Reenvio do código de confirmação | 5 por e-mail e 10 por IP, em 1 h |
+| Senha atual errada em `/me/senha` | 5 por usuário, em 15 min |
+
+- **CORS** restrito às origens do `CORS_ORIGINS`, com apenas `GET` e `POST`.
+- **E-mails** sempre salvos em minúsculas, com índice único.
+- **Chaves e senhas** ficam só no `.env` (nunca no código).
+- **Logs** sem dados sensíveis (sem tokens, e-mails ou respostas do Brevo).
+
+> Ao testar muitas vezes o "esqueci minha senha" com o mesmo e-mail, você pode bater no limite de 5 pedidos por hora. É o comportamento esperado. Para testar à vontade, aumente temporariamente o número em `PEDIR_POR_EMAIL` no `api/regras.py`, ou zere o contador com o SQL da seção [Banco de dados](#banco-de-dados).
+
+## Conectando o front-end
+
+O front-end (React) conversa com esta API pelo endereço definido em `VITE_API_URL`. Sem essa variável, ele usa `http://127.0.0.1:8000`.
+
+Para o navegador aceitar a conversa, o endereço do front precisa estar no `CORS_ORIGINS`. Por padrão já estão liberados `http://localhost:5173`, `http://127.0.0.1:5173` e `http://localhost:3000`.
+
+No cadastro, o front chama `/register`, mostra a tela de digitar o código e chama `/register/verificar`. Só depois do código certo ele faz o `/login`. O botão de reenviar usa `/register/reenviar`.
+
+Ao trocar a senha logado (`/me/senha`), a resposta traz um `access_token` novo. O front deve **salvar esse token no lugar do antigo**, porque o anterior deixa de valer. Qualquer resposta `401` em rotas protegidas deve levar o usuário de volta para a tela de login.
+
+## Problemas comuns
+
+| O que aparece | O que significa | Como resolver |
+| --- | --- | --- |
+| `ModuleNotFoundError: No module named 'httpx'` (ou outra biblioteca) | A biblioteca não está instalada **neste** Python, geralmente por causa do `(venv)` desativado | Ative o `(venv)` e rode `python -m pip install -r requirements.txt` |
+| `Variável de ambiente ausente: ...` | Falta uma linha obrigatória no `.env` | Adicione a variável citada na mensagem e reinicie a API |
+| `SECRET_KEY muito curta` | A chave tem menos de 32 caracteres | Gere outra com o comando da seção [Variáveis de ambiente](#variáveis-de-ambiente) |
+| `OperationalError` ou `connection refused` | O PostgreSQL está desligado, ou os dados do banco no `.env` estão errados | Ligue o serviço do PostgreSQL e confira `DB_*` |
+| `column "email_verificado" does not exist` | O banco ainda não tem a coluna da confirmação de e-mail | Rode o `ALTER TABLE` e o `UPDATE` da seção [Banco de dados](#banco-de-dados) |
+| `column "token_version" does not exist` | O banco ainda não tem a coluna da versão do token | Rode o `ALTER TABLE ... token_version` da seção [Banco de dados](#banco-de-dados) |
+| `function hashtextextended does not exist` | O PostgreSQL é mais antigo que a versão 11 | Atualize o PostgreSQL para a versão 11 ou mais nova |
+| `403` no login com a mensagem "Confirme seu e-mail antes de entrar" | A conta foi criada mas o código nunca foi digitado | Refaça o cadastro com o mesmo e-mail para receber um novo código, ou use `/register/reenviar` |
+| O e-mail com o código não chega | O Brevo recusou ou o e-mail foi parar no spam | Veja o terminal da API (erros aparecem como `Erro Brevo (...)`), confira o painel do Brevo em **Transactional → Logs** e olhe a caixa de spam |
+| `Erro Brevo (401)` | Chave de API errada | Gere uma nova chave e atualize o `BREVO_API_KEY` |
+| `Erro Brevo (400)` citando o remetente (*sender*) | O `EMAIL_REMETENTE` não está validado no Brevo | Valide o remetente (veja [Configurando o envio de e-mail](#configurando-o-envio-de-e-mail-brevo)) |
+| `Erro Brevo` falando de IP não autorizado | O Brevo está bloqueando o seu IP | No Brevo, em *Security → Authorized IPs*, desative o bloqueio ou adicione o seu IP |
+| `422 Unprocessable Content` | Os dados enviados não passaram na validação | Veja a resposta: o campo `detail` mostra qual campo está errado (e-mail inválido, campo faltando, senha curta...) |
+| `429` com "Muitas tentativas. Tente novamente em N minutos" | Você bateu no limite de tentativas por e-mail ou por IP | Espere o tempo indicado em `Retry-After`, ou zere o contador (veja [Banco de dados](#banco-de-dados)) |
+| `429` com "Aguarde 1 minuto antes de pedir um novo código" | O `/register` foi repetido para um e-mail não verificado em menos de 1 minuto | Espere 1 minuto e tente de novo |
+| `401` com "Esta conta está vinculada a outra conta do Google" | O e-mail já foi ligado a uma conta do Google diferente da que está tentando entrar | Entre com a conta do Google original, ou investigue se a segunda tentativa é legítima |
+| Aviso no terminal: "X-Forwarded-For com menos IPs que PROXIES_CONFIAVEIS" | O `PROXIES_CONFIAVEIS` está maior que 0, mas a API não está atrás de proxy | Localmente, use `PROXIES_CONFIAVEIS=0`. Em produção, confira quantos proxies ficam na frente da API |
+| "Pedi o código, a API respondeu ok, mas não veio e-mail" | O e-mail não está cadastrado, já está verificado (no caso do reenvio de cadastro), ou faltou 1 minuto desde o último pedido | Use um e-mail com conta criada e espere 1 minuto entre pedidos |
+| Todos os usuários bloqueados ao mesmo tempo depois de publicar | A API está atrás de um proxy e enxerga o mesmo IP para todo mundo | Defina `PROXIES_CONFIAVEIS` (veja [Produção](#produção)) |
+| Erro de **CORS** no navegador | O endereço do front não está liberado | Adicione o endereço ao `CORS_ORIGINS` e reinicie a API |
+| `ImportError: cannot import name ...` ao ligar | Algum arquivo do pacote `api` está com nome ou conteúdo diferente do esperado | Confira se existem `config.py`, `regras.py`, `limites.py`, `codigos.py`, `dependencias.py` e `email.py`, e se o `config.py` tem todas as variáveis (como `CORS_ORIGINS`, `EM_PRODUCAO` e `PROXIES_CONFIAVEIS`) |
+
+## Produção
+
+- Use **HTTPS**.
+- Defina `AMBIENTE=producao` e `CORS_ORIGINS` com o domínio real do front.
+- Use **PostgreSQL 11 ou mais novo**, porque o limite de tentativas depende de um recurso de lock dessa versão.
+- Aplique no banco os índices e as colunas da seção [Banco de dados](#banco-de-dados) antes de subir a nova versão.
+- Atrás de proxy (Nginx, Render, Railway, Cloudflare etc.), o limite por IP precisa enxergar o IP real do usuário. Defina `PROXIES_CONFIAVEIS` com a quantidade de proxies que ficam na frente da API: `1` para o proxy da hospedagem sozinho, `2` se houver também um proxy como o Cloudflare.
+
+```
+PROXIES_CONFIAVEIS=1
+```
+
+- Para descobrir o número certo, faça um login errado em produção e confira, no log, qual IP a API calculou. Se aparecer o IP do proxy, aumente o número em 1. Se aparecer um IP que não é o seu, diminua. Se aparecer o aviso de `X-Forwarded-For` com menos IPs que o esperado, o número está maior que a quantidade real de proxies.
+- Rode o servidor sem a leitura automática de cabeçalhos de proxy do uvicorn, para a contagem não ser aplicada duas vezes:
+
+```
+uvicorn api.main:app --host 0.0.0.0 --port 8000 --no-proxy-headers
+```
+
+- Garanta que a API só receba tráfego pelo proxy. Se ela também ficar acessível diretamente, qualquer pessoa consegue forjar o `X-Forwarded-For`.
+- Use um remetente de **domínio próprio** e autentique o domínio (SPF/DKIM) no Brevo, para os e-mails chegarem na caixa de entrada.
+- Conecte ao banco com um usuário de poucas permissões (apenas `SELECT`, `INSERT`, `UPDATE` e `DELETE`), e não com o superusuário.
+- **Nunca suba o `.env` para o Git.** Se isso já aconteceu, troque a `SECRET_KEY`, a senha do banco e a chave do Brevo (apague a antiga no painel do Brevo e gere outra).
+- Faça backups do banco (`pg_dump`) e mantenha as dependências atualizadas (`pip-audit`).

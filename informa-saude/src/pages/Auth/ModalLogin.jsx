@@ -1,16 +1,18 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
+
 import { AuthModalLayout } from './AuthModalLayout';
 import { FormInput } from '../../components';
 import RecoverPasswordModal from '../RecoverPassword/RecoverEmailGet/RecoverPasswordModal';
+
 import { entrar, entrarComGoogle, buscarPerfil } from '../../api/api';
 import { useUser } from '../../context/userContextStore';
 
 const mensagemDeErro = (err) =>
-  err.message === 'Failed to fetch'
+  err?.message === 'Failed to fetch'
     ? 'Não foi possível conectar ao servidor. Tente novamente.'
-    : err.message;
+    : err?.message || 'Não foi possível realizar o login. Tente novamente.';
 
 export function ModalLogin({ onClose, onAbrirCadastro }) {
   const navigate = useNavigate();
@@ -24,6 +26,7 @@ export function ModalLogin({ onClose, onAbrirCadastro }) {
 
   useEffect(() => {
     document.body.style.overflow = 'hidden';
+
     return () => {
       document.body.style.overflow = '';
     };
@@ -31,10 +34,16 @@ export function ModalLogin({ onClose, onAbrirCadastro }) {
 
   const concluirLogin = async ({ novoUsuario = false } = {}) => {
     const perfil = await buscarPerfil();
-    atualizarUsuario({ nome: perfil.nome, email: perfil.email });
-    if (perfil?.jornada_recomendada) {
-      atualizarJornada(perfil.jornada_recomendada);
-    }
+
+    atualizarUsuario({
+      nome: perfil.nome,
+      email: perfil.email,
+      avatar_url: perfil.avatar_url ?? null,
+      usuario_id: perfil.id,
+    });
+
+    atualizarJornada(perfil.jornada_recomendada ?? null);
+
     onClose();
     navigate(novoUsuario ? '/questionario' : '/inicio');
   };
@@ -46,7 +55,10 @@ export function ModalLogin({ onClose, onAbrirCadastro }) {
 
     try {
       const dados = await entrar(email.trim().toLowerCase(), senha);
-      await concluirLogin({ novoUsuario: dados?.novo_usuario });
+
+      await concluirLogin({
+        novoUsuario: dados?.novo_usuario ?? false,
+      });
     } catch (err) {
       setErro(mensagemDeErro(err));
     } finally {
@@ -56,16 +68,27 @@ export function ModalLogin({ onClose, onAbrirCadastro }) {
 
   const handleGoogle = async ({ credential }) => {
     setErro('');
+    setCarregando(true);
+
     try {
       const dados = await entrarComGoogle(credential);
-      await concluirLogin({ novoUsuario: dados.novo_usuario });
+
+      await concluirLogin({
+        novoUsuario: dados?.novo_usuario ?? false,
+      });
     } catch (err) {
       setErro(mensagemDeErro(err));
+    } finally {
+      setCarregando(false);
     }
   };
 
   return (
-    <AuthModalLayout onClose={onClose} titulo="Acessar conta" centralizarConteudo>
+    <AuthModalLayout
+      onClose={onClose}
+      titulo="Acessar conta"
+      centralizarConteudo
+    >
       <form onSubmit={handleEntrar}>
         <FormInput
           id="modal-email"
@@ -98,11 +121,18 @@ export function ModalLogin({ onClose, onAbrirCadastro }) {
           >
             Esqueceu sua senha?
           </button>
-          <RecoverPasswordModal open={open} onClose={() => setOpen(false)} />
+
+          <RecoverPasswordModal
+            open={open}
+            onClose={() => setOpen(false)}
+          />
         </div>
 
         {erro && (
-          <div className="text-danger fs-6 mb-2 text-center" role="alert">
+          <div
+            className="text-danger fs-6 mb-2 text-center"
+            role="alert"
+          >
             {erro}
           </div>
         )}
@@ -123,22 +153,27 @@ export function ModalLogin({ onClose, onAbrirCadastro }) {
           </div>
 
           <div className="d-flex justify-content-center">
-  <GoogleLogin
-    onSuccess={handleGoogle}
-    onError={() => setErro('Não foi possível entrar com o Google.')}
-    locale="pt-BR"
-    theme="outline"            
-    size="large"              
-    shape="pill"               
-    text="continue_with"      
-    logo_alignment="center"    
-    width="350"                
-  />
-</div>
+            <GoogleLogin
+              onSuccess={handleGoogle}
+              onError={() =>
+                setErro('Não foi possível entrar com o Google.')
+              }
+              locale="pt-BR"
+              theme="outline"
+              size="large"
+              shape="pill"
+              text="continue_with"
+              logo_alignment="center"
+              width="350"
+            />
+          </div>
         </div>
 
         <div className="text-center mt-2 pt-2">
-          <span className="text-muted fs-6">Ainda não tem conta? </span>
+          <span className="text-muted fs-6">
+            Ainda não tem conta?{' '}
+          </span>
+
           <button
             type="button"
             className="is-link-button is-auth-access-link fs-6"

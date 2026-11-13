@@ -7,7 +7,8 @@ import { alterarSenha } from '../../api/api';
 const senhaForte = (s) =>
   s.length >= 8 &&
   s.length <= 72 &&
-  /[@#%*!$&^\-_+=[{():;'"<>,.?/|\\]/.test(s) &&
+  new TextEncoder().encode(s).length <= 72 &&
+  /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(s) &&
   /[A-Z]/.test(s) &&
   /[a-z]/.test(s) &&
   /\d/.test(s);

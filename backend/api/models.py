@@ -1,10 +1,20 @@
 from sqlalchemy import (
-    BigInteger, Boolean, Column, Date, DateTime, ForeignKey,
-    Integer, SmallInteger, String, Text, func,
+    BigInteger,
+    Boolean,
+    Column,
+    Date,
+    DateTime,
+    ForeignKey,
+    Index,
+    Integer,
+    SmallInteger,
+    String,
+    Text,
+    UniqueConstraint,
+    func,
 )
 
 from .database import Base
-from sqlalchemy import UniqueConstraint
 
 
 class User(Base):
@@ -43,6 +53,11 @@ class LimiteRequisicao(Base):
 
     __tablename__ = "limites_requisicao"
 
+    __table_args__ = (
+        Index("ix_limites_acao_chave_criado_em", "acao", "chave", "criado_em"),
+        Index("ix_limites_criado_em", "criado_em"),
+    )
+
     id = Column(BigInteger, primary_key=True)
     acao = Column(String(30), nullable=False)
     chave = Column(String(200), nullable=False)
@@ -77,6 +92,7 @@ class ResultadoQuestionario(Base):
     jornada_recomendada = Column(String(50), nullable=False)  # "cardiaca", "sono", "respiratoria"
     criado_em = Column(DateTime(timezone=True), server_default=func.now())
 
+
 class JornadaUsuario(Base):
     __tablename__ = "jornadas_usuario"
 
@@ -107,6 +123,7 @@ class JornadaUsuario(Base):
     )
 
     concluida_em = Column(DateTime(timezone=True))
+
 
 class AtividadeAprendizado(Base):
     __tablename__ = "atividades_aprendizado"

@@ -90,3 +90,24 @@ def enviar_codigo_verificacao(destinatario: str, codigo: str) -> bool:
         _montar_html(conteudo),
         texto_plano,
     )
+
+def enviar_aviso_senha_alterada(destinatario: str) -> bool:
+    texto_plano = (
+        "Olá!\n\nA senha da sua conta na informa-Saúde acabou de ser alterada.\n\n"
+        "Se foi você, não precisa fazer nada. Se não foi, use a opção "
+        "'Esqueci minha senha' para criar uma nova senha imediatamente."
+    )
+
+    conteudo = """
+<p>Olá,</p>
+<p>A senha da sua conta na <strong>informa-Saúde</strong> acabou de ser alterada, e todas as sessões abertas foram encerradas.</p>
+<p>Se foi você, não precisa fazer nada.</p>
+<p><strong>Se não foi você</strong>, use a opção "Esqueci minha senha" na tela de login para criar uma nova senha agora mesmo.</p>
+"""
+
+    return enviar_email(
+        destinatario,
+        "Sua senha foi alterada - informa-Saúde",
+        _montar_html(conteudo),
+        texto_plano,
+    )

@@ -1,49 +1,77 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Bell, Trash2 } from 'lucide-react';
+
+import { useUser } from '../../context/userContextStore';
+import { obterFotoPerfil } from '../../utils/fotoPerfil';
+import {
+  obterNomeUsuario,
+  obterEmailUsuario,
+  resolverFoto,
+} from '../../utils/usuario';
+
 import {
   SystemNavbar,
   TituloPaginaSistema,
   CardPerfilSidebar,
   ModalConfirmacao,
-  ToastFeedback
+  ToastFeedback,
 } from '../../components';
-import { obterFotoPerfil } from '../../utils/fotoPerfil';
-import { obterEmailUsuario, obterNomeUsuario } from '../../utils/usuario';
 
 export function Configuracoes() {
-  const navigate = useNavigate();
-  const nomeUsuario = obterNomeUsuario();
-  const emailUsuario = obterEmailUsuario();
+  const { usuario } = useUser();
+
   const [modalDeletar, setModalDeletar] = useState(false);
   const [notificacoesAtivas, setNotificacoesAtivas] = useState(true);
   const [toastConfig, setToastConfig] = useState(null);
-  const [foto, setFoto] = useState(obterFotoPerfil);
+
+  const [foto, setFoto] = useState(
+    () => obterFotoPerfil() ?? resolverFoto(usuario?.avatar_url)
+  );
+
+  const nomeUsuario = usuario?.nome || obterNomeUsuario();
+  const emailUsuario = usuario?.email || obterEmailUsuario();
 
   useEffect(() => {
     const atualizarFoto = () => {
-      setFoto(obterFotoPerfil());
+      const fotoLocal = obterFotoPerfil();
+
+      setFoto(fotoLocal ?? resolverFoto(usuario?.avatar_url));
     };
 
     window.addEventListener('storage', atualizarFoto);
     window.addEventListener('foto-perfil-atualizada', atualizarFoto);
+
+    atualizarFoto();
+
     return () => {
       window.removeEventListener('storage', atualizarFoto);
-      window.removeEventListener('foto-perfil-atualizada', atualizarFoto);
+      window.removeEventListener(
+        'foto-perfil-atualizada',
+        atualizarFoto
+      );
     };
-  }, []);
+  }, [usuario?.avatar_url, usuario?.email, usuario?.usuario_id]);
 
   const handleDeletarConta = () => {
     setModalDeletar(false);
-    navigate('/');
+
+    setToastConfig({
+      mensagem:
+        'A exclusão de conta ainda não está disponível. Nenhum dado foi removido.',
+      tipo: 'neutro',
+    });
   };
 
   const handleToggleNotificacoes = (e) => {
     const ativou = e.target.checked;
+
     setNotificacoesAtivas(ativou);
+
     setToastConfig({
-      mensagem: ativou ? 'Notificações ativadas com sucesso!' : 'Notificações desativadas.',
-      tipo: ativou ? 'sucesso' : 'neutro'
+      mensagem: ativou
+        ? 'Preferência de notificações ativada nesta sessão.'
+        : 'Preferência de notificações desativada nesta sessão.',
+      tipo: ativou ? 'sucesso' : 'neutro',
     });
   };
 
@@ -55,7 +83,10 @@ export function Configuracoes() {
         <TituloPaginaSistema
           titulo="Configurações"
           subtitulo="Gerencie preferências de notificação e segurança da conta"
-          linkVoltar={{ to: '/meu-perfil', texto: 'Voltar para Meu Perfil' }}
+          linkVoltar={{
+            to: '/meu-perfil',
+            texto: 'Voltar para Meu Perfil',
+          }}
         />
 
         <div className="row g-4">
@@ -70,7 +101,9 @@ export function Configuracoes() {
 
           <div className="col-12 col-lg-8">
             <div className="bg-white rounded-4 shadow-sm p-4 border-0">
-              <h4 className="fw-bold text-dark fs-4 mb-4">Preferências do Sistema</h4>
+              <h4 className="fw-bold text-dark fs-4 mb-4">
+                Preferências do Sistema
+              </h4>
 
               <div className="d-flex flex-column gap-3">
                 <div className="d-flex align-items-center justify-content-between p-3 rounded-3 bg-light border">
@@ -78,17 +111,25 @@ export function Configuracoes() {
                     <div className="is-icon-chip mb-0 rounded-circle is-profile-icon flex-shrink-0">
                       <Bell size={22} />
                     </div>
+
                     <div>
-                      <span className="fw-bold fs-5 d-block text-dark">Notificações</span>
-                      <span className="text-muted fs-6">Receber alertas de novas jornadas e dicas de saúde</span>
+                      <span className="fw-bold fs-5 d-block text-dark">
+                        Notificações
+                      </span>
+
+                      <span className="text-muted fs-6">
+                        Receber alertas de novas jornadas e dicas de saúde
+                      </span>
                     </div>
                   </div>
+
                   <div className="form-check form-switch m-0 p-0 flex-shrink-0 fs-4">
                     <input
                       className="form-check-input ms-0 cursor-pointer"
                       type="checkbox"
                       checked={notificacoesAtivas}
                       onChange={handleToggleNotificacoes}
+                      aria-label="Ativar ou desativar notificações"
                     />
                   </div>
                 </div>
@@ -100,11 +141,20 @@ export function Configuracoes() {
                 >
                   <div className="d-flex align-items-center gap-3">
                     <div className="is-icon-chip mb-0 rounded-circle is-profile-icon flex-shrink-0">
-                      <Trash2 size={22} className="text-danger" />
+                      <Trash2
+                        size={22}
+                        className="text-danger"
+                      />
                     </div>
+
                     <div>
-                      <span className="fw-bold fs-5 text-danger d-block">Deletar Conta</span>
-                      <span className="text-muted fs-6">Excluir permanentemente seus dados do sistema</span>
+                      <span className="fw-bold fs-5 text-danger d-block">
+                        Deletar Conta
+                      </span>
+
+                      <span className="text-muted fs-6">
+                        Exclusão de conta ainda não disponível
+                      </span>
                     </div>
                   </div>
                 </button>
@@ -118,11 +168,10 @@ export function Configuracoes() {
         aberto={modalDeletar}
         onClose={() => setModalDeletar(false)}
         onConfirmar={handleDeletarConta}
-        titulo="Excluir Conta?"
-        mensagem="Esta ação é irreversível. Todos os seus pontos e histórico de jornadas serão removidos."
-        textoConfirmar="Sim, excluir minha conta"
-        textoCancelar="Cancelar"
-        perigo
+        titulo="Exclusão de conta indisponível"
+        mensagem="A exclusão definitiva da conta ainda não foi integrada ao servidor. Nenhum dado será removido ao continuar."
+        textoConfirmar="Entendi"
+        textoCancelar="Voltar"
       />
 
       <ToastFeedback

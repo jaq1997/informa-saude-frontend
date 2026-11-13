@@ -1,40 +1,48 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ChevronDown } from 'lucide-react';
+
 import { BarraAcessibilidade } from '../BarraAcessibilidade/BarraAcessibilidade';
 import { AvatarUsuario } from '../AvatarUsuario/AvatarUsuario';
 import { Logo } from '../Logo/Logo';
+
 import { obterNomeUsuario } from '../../utils/usuario';
 import { obterFotoPerfil } from '../../utils/fotoPerfil';
+import { useUser } from '../../context/userContextStore';
 
 export function SystemNavbar() {
   const navigate = useNavigate();
-  const nomeUsuario = obterNomeUsuario();
+  const { usuario, sair } = useUser();
+
+  const nomeUsuario = usuario?.nome || obterNomeUsuario();
+
   const [modalSair, setModalSair] = useState(false);
-  const [fotoNavbar, setFotoNavbar] = useState(obterFotoPerfil);
+  const [fotoNavbar, setFotoNavbar] = useState(
+    () => obterFotoPerfil() || usuario?.avatar_url || null
+  );
 
   useEffect(() => {
     const atualizarFoto = () => {
-      setFotoNavbar(obterFotoPerfil());
+      setFotoNavbar(
+        obterFotoPerfil() || usuario?.avatar_url || null
+      );
     };
 
     window.addEventListener('storage', atualizarFoto);
     window.addEventListener('foto-perfil-atualizada', atualizarFoto);
+
     atualizarFoto();
 
     return () => {
       window.removeEventListener('storage', atualizarFoto);
       window.removeEventListener('foto-perfil-atualizada', atualizarFoto);
     };
-  }, []);
+  }, [usuario?.avatar_url, usuario?.email, usuario?.usuario_id]);
 
   const confirmarSaida = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('informa-saude-usuario-ativo');
-    localStorage.removeItem('informa-saude-jornada-destaque');
+    sair();
     setModalSair(false);
-    navigate('/');
+    navigate('/', { replace: true });
   };
 
   return (
@@ -44,6 +52,7 @@ export function SystemNavbar() {
       <header className="is-navbar sticky-top bg-white border-bottom shadow-sm">
         <nav className="is-container py-2 d-flex align-items-center justify-content-between">
           <Logo to="/inicio" />
+
           <div className="dropdown">
             <button
               type="button"
@@ -51,18 +60,60 @@ export function SystemNavbar() {
               data-bs-toggle="dropdown"
               aria-expanded="false"
             >
-              <AvatarUsuario nome={nomeUsuario} src={fotoNavbar} tamanho="sm" />
-              <span className="d-none d-sm-inline fw-bold text-dark text-nowrap">{nomeUsuario}</span>
-              <ChevronDown size={18} className="flex-shrink-0 text-muted ms-1" aria-hidden="true" />
+              <AvatarUsuario
+                nome={nomeUsuario}
+                src={fotoNavbar}
+                tamanho="sm"
+              />
+
+              <span className="d-none d-sm-inline fw-bold text-dark text-nowrap">
+                {nomeUsuario}
+              </span>
+
+              <ChevronDown
+                size={18}
+                className="flex-shrink-0 text-muted ms-1"
+                aria-hidden="true"
+              />
             </button>
+
             <ul className="dropdown-menu dropdown-menu-end shadow-sm">
-              <li><Link className="dropdown-item" to="/meu-perfil">Meu Perfil</Link></li>
-              <li><Link className="dropdown-item" to="/editar-perfil">Editar Perfil</Link></li>
-              <li><Link className="dropdown-item" to="/configuracoes">Configurações</Link></li>
-              <li><a className="dropdown-item" href="/404.html">Meus pontos</a></li>
-              <li><hr className="dropdown-divider" /></li>
               <li>
-                <button type="button" className="dropdown-item text-danger" onClick={() => setModalSair(true)}>Sair</button>
+                <Link className="dropdown-item" to="/meu-perfil">
+                  Meu Perfil
+                </Link>
+              </li>
+
+              <li>
+                <Link className="dropdown-item" to="/editar-perfil">
+                  Editar Perfil
+                </Link>
+              </li>
+
+              <li>
+                <Link className="dropdown-item" to="/configuracoes">
+                  Configurações
+                </Link>
+              </li>
+
+              <li>
+                <a className="dropdown-item" href="/404.html">
+                  Meus pontos
+                </a>
+              </li>
+
+              <li>
+                <hr className="dropdown-divider" />
+              </li>
+
+              <li>
+                <button
+                  type="button"
+                  className="dropdown-item text-danger"
+                  onClick={() => setModalSair(true)}
+                >
+                  Sair
+                </button>
               </li>
             </ul>
           </div>
@@ -70,7 +121,10 @@ export function SystemNavbar() {
       </header>
 
       {modalSair && (
-        <div className="is-modal-overlay" onClick={() => setModalSair(false)}>
+        <div
+          className="is-modal-overlay"
+          onClick={() => setModalSair(false)}
+        >
           <div
             className="bg-white rounded-4 shadow-lg border-0 position-relative is-modal-box is-modal-box-sm p-4 pt-5"
             role="dialog"
@@ -83,16 +137,33 @@ export function SystemNavbar() {
               className="btn-close position-absolute top-0 end-0 m-3 z-3"
               onClick={() => setModalSair(false)}
               aria-label="Fechar"
-            ></button>
-            <h2 id="navbar-sair-modal-title" className="fw-bold text-dark fs-4 mb-2">Sair do aplicativo?</h2>
+            />
+
+            <h2
+              id="navbar-sair-modal-title"
+              className="fw-bold text-dark fs-4 mb-2"
+            >
+              Sair do aplicativo?
+            </h2>
+
             <p className="text-muted fs-6 mb-4">
               Você precisará preencher suas credenciais ao acessar novamente.
             </p>
+
             <div className="is-modal-actions">
-              <button type="button" className="is-btn is-btn--profile is-btn--orange fs-6" onClick={confirmarSaida}>
+              <button
+                type="button"
+                className="is-btn is-btn--profile is-btn--orange fs-6"
+                onClick={confirmarSaida}
+              >
                 Sim, sair
               </button>
-              <button type="button" className="is-btn is-btn--profile is-btn--outline-green fs-6" onClick={() => setModalSair(false)}>
+
+              <button
+                type="button"
+                className="is-btn is-btn--profile is-btn--outline-green fs-6"
+                onClick={() => setModalSair(false)}
+              >
                 Cancelar
               </button>
             </div>

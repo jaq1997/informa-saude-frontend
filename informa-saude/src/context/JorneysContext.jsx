@@ -38,8 +38,41 @@ export function JornadasProvider({ children }) {
   }, []);
 
   useEffect(() => {
-    atualizarDashboard();
-  }, [atualizarDashboard]);
+    let ativo = true;
+
+    async function carregarDashboardInicial() {
+      try {
+        const dados = await buscarDashboard();
+
+        if (!ativo) return;
+
+        setDashboard({
+          diasAprendidos: dados.diasAprendidos,
+          progressoSemanal: dados.progressoSemanal,
+          xpHistorico: dados.xpHistorico,
+          jornadas: dados.jornadas,
+          minutos: dados.minutos,
+        });
+
+        setErro(null);
+      } catch (error) {
+        if (!ativo) return;
+
+        setDashboard(estadoInicial);
+        setErro(error.message || "Erro ao carregar o Dashboard.");
+      } finally {
+        if (ativo) {
+          setCarregando(false);
+        }
+      }
+    }
+
+    carregarDashboardInicial();
+
+    return () => {
+      ativo = false;
+    };
+  }, []);
 
   const value = useMemo(
     () => ({
