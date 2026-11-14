@@ -155,17 +155,15 @@ export function ModalLogin({ onClose, onAbrirCadastro }) {
 
           <div className="is-google-login">
             <GoogleLogin
-              onSuccess={handleGoogle}
-              onError={() =>
-                setErro('Não foi possível entrar com o Google.')
-              }
-              locale="pt-BR"
-              theme="filled_black"
+              onSuccess={(resposta) => entrarComGoogle(resposta.credential)}
+              onError={() => console.log('Falha no login com Google')}
+              theme="outline"
               size="large"
               shape="pill"
               text="continue_with"
               logo_alignment="center"
-              width={String(larguraBotaoGoogle)}
+              width="320"
+              locale="pt-BR"
             />
           </div>
         </div>

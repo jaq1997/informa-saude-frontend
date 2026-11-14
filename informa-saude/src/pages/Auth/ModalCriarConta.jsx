@@ -561,7 +561,7 @@ export function ModalCriarConta({ onClose, onAbrirLogin }) {
                     : ''
                 }
               >
-                Entre 8 e 72 caracteres, até 72 bytes, e pelo
+                Entre 8 e 72 caracteres e pelo
                 menos 1 símbolo
               </li>
 
