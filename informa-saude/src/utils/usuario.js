@@ -1,10 +1,8 @@
-import fotoPerfil from '../assets/images/foto-perfil.webp';
-
 export function resolverFoto(avatarGoogle) {
   const fotoSalva = localStorage.getItem('informa-saude-foto-perfil');
   if (fotoSalva === 'null') return null;
   if (fotoSalva) return fotoSalva;
-  return avatarGoogle || fotoPerfil;
+  return avatarGoogle || null;
 }
 
 export function obterNomeUsuario() {
