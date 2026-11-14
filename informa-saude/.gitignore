@@ -37,6 +37,9 @@ jornadas-conteudos/
 src/assets/images/*.jpg
 src/assets/images/*.jpeg
 src/assets/images/*.png
+!src/assets/images/sleep.jpg
+!src/assets/images/cardiac-hero.jpg
+!src/assets/images/breathing.jpg
 
 !src/assets/images/hero-care-vertical.jpg
 !src/assets/images/hero-2-vertical.jpg
