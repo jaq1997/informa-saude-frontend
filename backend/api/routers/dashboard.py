@@ -56,6 +56,22 @@ def consultar_jornadas(
     )
 
 
+@router.get(
+    "/jornadas/{jornada_id}/atividades",
+    response_model=list[schemas.AtividadeResponse],
+)
+def consultar_atividades_jornada(
+    jornada_id: int,
+    usuario: models.User = Depends(usuario_atual),
+    db: Session = Depends(get_db),
+):
+    return dashboard_service.listar_atividades(
+        db=db,
+        usuario_id=usuario.id,
+        jornada_id=jornada_id,
+    )
+
+
 @router.patch(
     "/jornadas/{jornada_id}/concluir",
     response_model=schemas.JornadaResponse,

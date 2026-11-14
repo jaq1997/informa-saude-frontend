@@ -184,4 +184,5 @@ class DashboardResponse(BaseModel):
     progressoSemanal: list[bool]
     xpHistorico: list[int]
     jornadas: int
+    aulasConcluidas: int
     minutos: int
