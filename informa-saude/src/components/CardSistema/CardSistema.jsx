@@ -114,8 +114,13 @@ export function CardSistema({
             <h2 className="fw-bold text-white display-4 mb-2">{titulo}</h2>
             {descricao && <p className="text-white fs-6 mb-4">{descricao}</p>}
             {textoBotao && (
-              <BotaoSistema variante={varianteBotao} onClick={onClick} to={to} href={href} className="fs-5 px-4 py-2">
-                {textoBotao} {IconeBotao && <IconeBotao size={20} fill="currentColor" />}
+              <BotaoSistema
+                variante={varianteBotao}
+                onClick={onClick}
+                className="fs-5 px-4 py-2"
+              >
+                {textoBotao}{" "}
+                {IconeBotao && <IconeBotao size={20} fill="currentColor" />}
               </BotaoSistema>
             )}
           </div>
@@ -141,18 +146,29 @@ export function CardSistema({
             {titulo}
           </h3>
           {descricao && <p className="text-white fs-6 mb-4">{descricao}</p>}
-          {textoBotao && (
-            <BotaoSistema
-              variante={varianteBotao}
-              larguraTotal={!centralizado}
-              onClick={onClick}
-              to={to}
-              href={href}
-              className={`fs-6 py-2 ${centralizado ? 'px-4' : ''}`}
-            >
-              {textoBotao} {IconeBotao && <IconeBotao size={18} fill="currentColor" />}
-            </BotaoSistema>
-          )}
+          {textoBotao &&
+            (to ? (
+              <Link to={to} className="text-decoration-none">
+                <BotaoSistema
+                  variante={varianteBotao}
+                  larguraTotal={!centralizado}
+                  className={`fs-6 py-2 ${centralizado ? "px-4" : ""}`}
+                >
+                  {textoBotao}
+                  {IconeBotao && <IconeBotao size={18} fill="currentColor" />}
+                </BotaoSistema>
+              </Link>
+            ) : (
+              <BotaoSistema
+                variante={varianteBotao}
+                larguraTotal={!centralizado}
+                onClick={onClick}
+                className={`fs-6 py-2 ${centralizado ? "px-4" : ""}`}
+              >
+                {textoBotao}
+                {IconeBotao && <IconeBotao size={18} fill="currentColor" />}
+              </BotaoSistema>
+            ))}
         </div>
       </article>
     );
