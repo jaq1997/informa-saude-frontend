@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { CheckCircle2, AlertTriangle, XCircle, Info } from 'lucide-react';
 
 export function ToastFeedback({

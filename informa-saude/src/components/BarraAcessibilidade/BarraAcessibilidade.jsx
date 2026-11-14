@@ -1,4 +1,3 @@
-import React from 'react';
 import { IconeContraste } from '../IconeContraste/IconeContraste';
 
 export function BarraAcessibilidade() {

@@ -1,0 +1,833 @@
+/* Página */
+.health-page {
+  min-height: 100vh;
+  color: var(--is-text);
+  background: var(--is-surface-muted);
+  font-family: var(--font-principal);
+}
+
+.health-main {
+  width: min(100% - 252px, 1440px);
+  margin: 0 auto;
+  padding: 28px 0 40px;
+}
+
+.health-eyebrow {
+  margin-bottom: 5px;
+  color: var(--is-orange-dark);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.health-title {
+  margin-bottom: 5px;
+  color: var(--is-text);
+  font-size: clamp(32px, 3vw, 40px);
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.health-description {
+  margin-bottom: 25px;
+  color: var(--is-text-secondary);
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+/* Painel de localização e pesquisa */
+.health-search-panel {
+  padding: 20px;
+  border: 1px solid var(--is-border-soft);
+  border-radius: var(--is-radius-card);
+  background: var(--is-surface);
+  box-shadow: var(--is-shadow-sm);
+}
+
+.health-location-notice {
+  margin-bottom: 12px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.health-search-row {
+  display: flex;
+  align-items: stretch;
+  gap: 12px;
+}
+
+.health-button {
+  min-height: 44px;
+  padding: 0 17px;
+  border: 1px solid transparent;
+  border-radius: var(--is-radius-control);
+  font-family: inherit;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 160ms ease, transform 160ms ease;
+}
+
+.health-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.health-button:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.health-button-primary {
+  color: var(--is-white);
+  background: var(--is-green);
+}
+
+.health-button-primary:hover:not(:disabled) {
+  background: var(--is-green-dark);
+}
+
+.health-button-outline {
+  color: var(--is-green-dark);
+  border-color: var(--is-green-dark);
+  background: transparent;
+}
+
+.health-button-outline:hover:not(:disabled) {
+  background: var(--is-green);
+  color: var(--is-white);
+}
+
+.health-search-form {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  gap: 8px;
+}
+
+.health-search-input {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  padding: 0 13px;
+  border: 1px solid var(--is-border-soft);
+  border-radius: var(--is-radius-control);
+  color: var(--is-text);
+  background: var(--is-surface);
+  font-family: inherit;
+}
+
+.health-search-input::placeholder {
+  color: #9a8e83;
+}
+
+.health-search-input:focus {
+  border-color: var(--is-green-dark);
+  outline: 2px solid var(--is-green);
+}
+
+.health-message {
+  margin: 12px 0 0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.health-message-error {
+  color: var(--is-danger);
+}
+
+.health-message-warning {
+  padding: 10px 12px;
+  border-radius: 10px;
+  color: #854d0e;
+  background: #fff7df;
+}
+
+.health-search-caption {
+  margin: 8px 0 0;
+  color: var(--is-text-muted);
+  font-size: 12px;
+}
+
+/* Filtros e raio */
+.health-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.health-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.health-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 0 13px;
+  border: 1px solid var(--filter-color);
+  border-radius: 999px;
+  color: var(--is-text);
+  background: var(--filter-background);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.health-filter::before {
+  width: 9px;
+  height: 9px;
+  flex: 0 0 9px;
+  border-radius: 50%;
+  background: var(--filter-color);
+  content: "";
+}
+
+.health-filter[aria-pressed="false"] {
+  opacity: 0.55;
+  background: transparent;
+}
+
+.health-filter-hospital {
+  --filter-color: var(--is-hospital);
+  --filter-background: #FFF0ED;
+}
+
+.health-filter-ubs {
+  --filter-color: var(--is-ubs);
+  --filter-background: #E9F8EE;
+}
+
+.health-filter-clinic {
+  --filter-color: var(--is-clinic);
+  --filter-background: #E8F5FD;
+}
+
+.health-filter-pharmacy {
+  --filter-color: var(--is-pharmacy);
+  --filter-background: var(--is-orange-light);
+}
+
+.health-radius {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex-shrink: 0;
+  color: var(--is-text-secondary);
+  font-size: 13px;
+}
+
+.health-radius select {
+  min-height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--is-border-soft);
+  border-radius: 12px;
+  color: var(--is-text);
+  background: var(--is-white);
+  font-family: inherit;
+}
+
+/* Mapa e resultados */
+.health-mobile-tabs {
+  display: none;
+}
+
+.health-results-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 380px;
+  align-items: stretch;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.health-map-container {
+  position: relative;
+  min-width: 0;
+  height: 640px;
+  overflow: hidden;
+  border: 1px solid var(--is-border-soft);
+  border-radius: 18px;
+  background: #e9e4de;
+  box-shadow: var(--is-shadow-sm);
+}
+
+.health-map-loading {
+  position: absolute;
+  z-index: 500;
+  top: 12px;
+  left: 50%;
+  padding: 9px 15px;
+  border-radius: 999px;
+  color: var(--is-text);
+  background: var(--is-white);
+  box-shadow: var(--is-shadow-md);
+  font-size: 12px;
+  white-space: nowrap;
+  transform: translateX(-50%);
+}
+
+/* Lista */
+.health-results-panel {
+  display: flex;
+  min-width: 0;
+  max-height: 640px;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--is-border-soft);
+  border-radius: 18px;
+  background: var(--is-surface);
+  box-shadow: var(--is-shadow-sm);
+}
+
+.health-results-header {
+  display: flex;
+  min-height: 45px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--is-border-soft);
+}
+
+.health-results-count {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.health-refresh-button {
+  padding: 5px;
+  border: 0;
+  color: var(--is-orange-dark);
+  background: transparent;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.health-refresh-button:hover {
+  text-decoration: underline;
+}
+
+.health-results-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px 16px;
+  scrollbar-width: thin;
+}
+
+.health-place {
+  padding: 15px 0;
+  border-bottom: 1px solid var(--is-border-soft);
+}
+
+.health-place:last-child {
+  border-bottom: 0;
+}
+
+.health-place-selected {
+  margin: 0 -8px;
+  padding-right: 8px;
+  padding-left: 8px;
+  border-radius: 10px;
+  background: var(--is-orange-light);
+}
+
+.health-place-category {
+  margin-bottom: 4px;
+  color: var(--is-orange-dark);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+
+.health-place-name {
+  margin-bottom: 4px;
+  color: var(--is-text);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.health-place-address {
+  margin-bottom: 3px;
+  color: var(--is-text-secondary);
+  font-size: 13px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.health-place-distance {
+  margin-bottom: 10px;
+  color: var(--is-text-muted);
+  font-size: 12px;
+}
+
+.health-place-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.health-place-action {
+  display: inline-flex;
+  min-height: 34px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 12px;
+  border: 1px solid var(--is-orange);
+  border-radius: 10px;
+  color: var(--is-orange-dark);
+  background: transparent;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.health-place-action:hover {
+  background: var(--is-orange-light);
+}
+
+.health-place-action-primary {
+  color: var(--is-white);
+  background: var(--is-orange);
+}
+
+.health-place-action-primary:hover {
+  color: var(--is-white);
+  background: var(--is-orange-dark);
+}
+
+.health-empty-state,
+.health-error-actions {
+  padding: 20px 12px;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.health-empty-state {
+  color: var(--is-text-secondary);
+  text-align: center;
+}
+
+
+/* Ajustes da lista e estados de carregamento */
+
+.health-places-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.health-map-skeleton {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  min-height: 300px;
+  color: var(--is-text-secondary);
+  background: #e9e4de;
+  font-size: 13px;
+}
+
+.health-place-category-hospital {
+  color: var(--is-hospital);
+}
+
+.health-place-category-ubs {
+  color: var(--is-ubs);
+}
+
+.health-place-category-clinic {
+  color: var(--is-clinic);
+}
+
+.health-place-category-pharmacy {
+  color: var(--is-pharmacy);
+}
+
+.health-error-actions .health-button {
+  margin-top: 12px;
+}
+
+.health-place-name,
+.health-place-category,
+.health-place-address,
+.health-place-distance {
+  margin-top: 0;
+}
+
+/* Tablet */
+@media (max-width: 1024px) {
+  .health-main {
+    width: calc(100% - 48px);
+  }
+
+  .health-results-layout {
+    grid-template-columns: minmax(0, 1fr) 320px;
+    gap: 12px;
+  }
+}
+
+/* Celular */
+@media (max-width: 767px) {
+  .health-main {
+    width: calc(100% - 32px);
+    padding-top: 20px;
+    padding-bottom: 24px;
+  }
+
+  .health-eyebrow {
+    font-size: 9px;
+    letter-spacing: 1.2px;
+  }
+
+  .health-title {
+    font-size: clamp(25px, 7vw, 31px);
+  }
+
+  .health-description {
+    margin-bottom: 18px;
+    font-size: 13px;
+  }
+
+  .health-search-panel {
+    padding: 12px;
+    border-radius: 16px;
+  }
+
+  .health-location-notice {
+    font-size: 12px;
+  }
+
+  .health-search-row {
+    flex-direction: column;
+    gap: 9px;
+  }
+
+  .health-search-row > .health-button {
+    width: 100%;
+  }
+
+  .health-search-form {
+    gap: 6px;
+  }
+
+  .health-search-input {
+    min-height: 42px;
+    padding: 0 10px;
+    font-size: 12px;
+  }
+
+  .health-search-form .health-button {
+    min-height: 42px;
+    padding: 0 12px;
+    font-size: 12px;
+  }
+
+  .health-toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 15px;
+  }
+
+  .health-filters {
+    gap: 6px;
+  }
+
+  .health-filter {
+    min-height: 29px;
+    gap: 5px;
+    padding: 0 9px;
+    font-size: 10px;
+  }
+
+  .health-filter::before {
+    width: 7px;
+    height: 7px;
+    flex-basis: 7px;
+  }
+
+  .health-radius {
+    align-self: flex-end;
+  }
+
+  .health-mobile-tabs {
+    display: flex;
+    gap: 8px;
+    margin-top: 14px;
+  }
+
+  .health-mobile-tab {
+    flex: 1;
+    min-height: 36px;
+    border: 1px solid var(--is-border-soft);
+    border-radius: 999px;
+    color: var(--is-text-secondary);
+    background: var(--is-white);
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .health-mobile-tab-active {
+    border-color: var(--is-orange);
+    color: var(--is-orange-dark);
+    background: var(--is-orange-light);
+  }
+
+  .health-results-layout {
+    display: block;
+    margin-top: 12px;
+  }
+
+  .health-map-container {
+    height: 56vh;
+    min-height: 300px;
+    max-height: 520px;
+    border-radius: 14px;
+  }
+
+  .health-results-panel {
+    height: 56vh;
+    min-height: 300px;
+    max-height: 520px;
+    margin-top: 0;
+    border-radius: 14px;
+  }
+
+  .health-results-header {
+    padding: 11px 13px;
+  }
+
+  .health-results-count,
+  .health-refresh-button {
+    font-size: 12px;
+  }
+
+  .health-results-list {
+    padding-right: 13px;
+    padding-left: 13px;
+  }
+
+  .health-place {
+    padding: 13px 0;
+  }
+
+  .health-place-name {
+    font-size: 14px;
+  }
+
+  .health-place-address {
+    font-size: 12px;
+  }
+
+  .health-place-action {
+    min-height: 32px;
+    font-size: 11px;
+  }
+
+  .health-map-hidden,
+  .health-results-hidden {
+    display: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .health-button {
+    transition: none;
+  }
+}
+
+
+.health-map {
+  width: 100%;
+  height: 100%;
+  min-height: 300px;
+  background: #eee8df;
+}
+
+.health-map .leaflet-control-zoom {
+  overflow: hidden;
+  border: 1px solid var(--is-border-soft);
+  border-radius: 10px;
+  box-shadow: var(--is-shadow-sm);
+}
+
+.health-map .leaflet-control-zoom a {
+  width: 34px;
+  height: 34px;
+  color: var(--is-text);
+  background: var(--is-white);
+  line-height: 34px;
+}
+
+.health-map .leaflet-control-zoom a:hover {
+  color: var(--is-orange-dark);
+  background: var(--is-orange-light);
+}
+
+.health-map .leaflet-popup-content-wrapper {
+  border-radius: 13px;
+  background: var(--is-white);
+  box-shadow: var(--is-shadow-md);
+}
+
+.health-map .leaflet-popup-content {
+  margin: 14px;
+  color: var(--is-text);
+  font-family: var(--font-principal);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.health-map .leaflet-popup-tip {
+  background: var(--is-white);
+}
+
+.health-map .leaflet-popup-close-button {
+  color: var(--is-text-secondary) !important;
+}
+
+.health-map .leaflet-control-attribution {
+  font-size: 9px;
+}
+
+
+/* Marcadores dos estabelecimentos */
+.health-marker-wrapper,
+.health-user-marker-wrapper {
+  background: transparent;
+  border: 0;
+}
+
+.health-marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: 3px solid var(--is-white);
+  border-radius: 50%;
+  color: var(--is-white);
+  background: var(--marker-color, var(--is-green));
+  box-shadow: 0 2px 8px #0000004D;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.health-marker-active {
+  width: 38px;
+  height: 38px;
+  font-size: 18px;
+  box-shadow: 0 3px 12px #00000059;
+}
+
+.health-marker-hospital {
+  --marker-color: var(--is-hospital);
+}
+
+.health-marker-ubs {
+  --marker-color: var(--is-ubs);
+}
+
+.health-marker-clinic {
+  --marker-color: var(--is-clinic);
+}
+
+.health-marker-pharmacy {
+  --marker-color: var(--is-pharmacy);
+}
+
+.health-user-marker {
+  width: 18px;
+  height: 18px;
+  border: 3px solid var(--is-white);
+  border-radius: 50%;
+  background: var(--is-green);
+  box-shadow: 0 0 0 5px #00645A33;
+}
+
+/* Conteúdo dos pop-ups */
+.health-popup {
+  min-width: 180px;
+  max-width: 250px;
+}
+
+.health-popup-category {
+  margin: 0 0 5px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+}
+
+.health-popup-category-hospital {
+  color: var(--is-hospital);
+}
+
+.health-popup-category-ubs {
+  color: var(--is-ubs);
+}
+
+.health-popup-category-clinic {
+  color: var(--is-clinic);
+}
+
+.health-popup-category-pharmacy {
+  color: var(--is-pharmacy);
+}
+
+.health-popup-name {
+  margin: 0 0 6px;
+  color: var(--is-text);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.health-popup-address,
+.health-popup-distance,
+.health-popup-phone {
+  margin: 0 0 5px;
+  color: var(--is-text-secondary);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.health-popup-route {
+  display: inline-block;
+  margin-top: 8px;
+  color: var(--is-orange-dark);
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.health-popup-route:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 767px) {
+  .health-map {
+    min-height: 300px;
+  }
+
+  .health-map .leaflet-control-zoom a {
+    width: 32px;
+    height: 32px;
+    line-height: 32px;
+  }
+
+  .health-map .leaflet-popup-content {
+    margin: 12px;
+  }
+}

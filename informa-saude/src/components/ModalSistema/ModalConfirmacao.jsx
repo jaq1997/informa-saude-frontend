@@ -1,4 +1,3 @@
-import React from 'react';
 import { ModalSistema } from './ModalSistema';
 import { BotaoSistema } from '../Botao/BotaoSistema';
 

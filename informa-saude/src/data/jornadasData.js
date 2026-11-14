@@ -1,6 +1,6 @@
-import imgSono from '../assets/images/imagem-sono.webp';
-import imgCardiaca from '../assets/images/imagem-cardiaca.webp';
-import imgRespiracao from '../assets/images/imagem-respiracao.webp';
+import imgSono from '../assets/images/sleep.jpg';
+import imgCardiaca from '../assets/images/cardiac-hero.jpg';
+import imgRespiracao from '../assets/images/breathing.jpg';
 
 /**
  * Catálogo central de Jornadas de Saúde.
@@ -10,44 +10,62 @@ export const JORNADAS_DATA = {
   cardiaca: {
     id: 'cardiaca',
     titulo: 'Jornada Cardíaca',
-    categoria: 'Hipertensão',
-    descricao: 'Aprenda como pequenos hábitos diários podem auxiliar na prevenção de infarto, controle de hipertensão e muito mais!',
+    categoria: 'Saúde do coração',
+    descricao: 'Conteúdos educativos sobre saúde do coração, sinais de alerta e cuidados cardiovasculares.',
     imagemCapa: imgCardiaca,
-    progresso: 65,
+    progresso: 0,
     episodios: [
       {
-        id: 'ep1',
+        id: 'xjea2uaogqi',
         numero: 1,
-        titulo: 'Controlando o colesterol na alimentação',
-        descricao: 'Dicas práticas sobre alimentação para manter os níveis de colesterol sob controle.',
-        duracao: '8 min',
-        concluido: true,
+        titulo: 'Batimentos cardíacos irregulares podem ser sinal de arritmia cardíaca | DrauzioCast',
+        descricao: 'Vídeo educativo sobre arritmia cardíaca.',
+        youtubeId: 'XJeA2uaOgQI',
+        concluido: false,
         thumb: imgCardiaca
       },
       {
-        id: 'ep2',
+        id: 'hzedusxt9cu',
         numero: 2,
-        titulo: 'Hábitos diários para o controle da glicemia',
-        descricao: 'Como pequenos ajustes na rotina ajudam na saúde cardiovascular e controle glicêmico.',
-        duracao: '10 min',
+        titulo: 'Como ter um coração saudável?',
+        descricao: 'Conteúdo educativo sobre cuidados com a saúde do coração.',
+        youtubeId: 'hZeDUSxT9cU',
         concluido: false,
         thumb: imgCardiaca
       },
       {
-        id: 'ep3',
+        id: 'tjhguf9jbzk',
         numero: 3,
-        titulo: 'Entendendo a Pressão Arterial',
-        descricao: 'Saiba como interpretar os números da sua pressão e o impacto no dia a dia.',
-        duracao: '6 min',
+        titulo: 'Doenças cardíacas crônicas | DrauzioCast',
+        descricao: 'Vídeo educativo sobre doenças cardíacas crônicas.',
+        youtubeId: 'TJhguf9JBZk',
         concluido: false,
         thumb: imgCardiaca
       },
       {
-        id: 'ep4',
+        id: 'qfsm6hhxu50',
         numero: 4,
-        titulo: 'Exercícios leves para o coração',
-        descricao: 'Atividades físicas seguras e de baixo impacto para fazer em casa.',
-        duracao: '7 min',
+        titulo: 'Dr. Drauzio Varella explica como identificar e agir diante de um infarto.',
+        descricao: 'Orientações educativas para reconhecer sinais de infarto e buscar ajuda.',
+        youtubeId: 'QFSm6HhXU50',
+        concluido: false,
+        thumb: imgCardiaca
+      },
+      {
+        id: 'sey-ks4fb-g',
+        numero: 5,
+        titulo: 'Infarto (ataque cardíaco) | Dicas de Saúde',
+        descricao: 'Vídeo educativo sobre infarto.',
+        youtubeId: 'sEY_kS4fb-g',
+        concluido: false,
+        thumb: imgCardiaca
+      },
+      {
+        id: 'spvp-cy72ui',
+        numero: 6,
+        titulo: 'Menopausa aumenta o risco de doenças cardiovasculares?',
+        descricao: 'Conteúdo educativo sobre menopausa e saúde cardiovascular.',
+        youtubeId: 'sPvp-CY72uI',
         concluido: false,
         thumb: imgCardiaca
       }
@@ -58,25 +76,35 @@ export const JORNADAS_DATA = {
     id: 'sono',
     titulo: 'Jornada do Sono',
     categoria: 'Bem-estar',
-    descricao: 'Descubra a higiene do sono e como acalmar a mente antes de dormir para melhorar suas noites.',
+    descricao: 'Vídeos educativos sobre sono, hábitos e descanso em diferentes rotinas.',
     imagemCapa: imgSono,
+    espelharImagemCapa: true,
     progresso: 0,
     episodios: [
       {
-        id: 'ep1',
+        id: 'lpxdrhtq91a',
         numero: 1,
-        titulo: 'A Importância do Sono Reparador',
-        descricao: 'O que acontece no seu corpo enquanto você dorme.',
-        duracao: '5 min',
+        titulo: 'Como a qualidade do sono pode influenciar no surgimento de demências?',
+        descricao: 'Conteúdo educativo sobre sono e saúde cerebral.',
+        youtubeId: 'lPXDRHTQ91A',
         concluido: false,
         thumb: imgSono
       },
       {
-        id: 'ep2',
+        id: 'cpsjc8ozw',
         numero: 2,
-        titulo: 'Higiene do Sono na Prática',
-        descricao: 'Como preparar o ambiente e desligar as telas antes de deitar.',
-        duracao: '7 min',
+        titulo: 'Hábitos que podem melhorar o seu sono',
+        descricao: 'Sugestões educativas sobre hábitos relacionados ao sono.',
+        youtubeId: '_cPSjc8OZ_w',
+        concluido: false,
+        thumb: imgSono
+      },
+      {
+        id: '9jy4uwp38ui',
+        numero: 3,
+        titulo: 'É possível dormir bem trabalhando de madrugada?',
+        descricao: 'Conteúdo educativo sobre sono e trabalho noturno.',
+        youtubeId: '9JY4UWP38uI',
         concluido: false,
         thumb: imgSono
       }
@@ -86,18 +114,46 @@ export const JORNADAS_DATA = {
   respiratoria: {
     id: 'respiratoria',
     titulo: 'Jornada Respiratória',
-    categoria: 'Prevenção',
-    descricao: 'Exercícios de respiração guiada, prevenção de crises respiratórias e cuidados diários.',
+    categoria: 'Saúde respiratória',
+    descricao: 'Conteúdos educativos sobre doenças respiratórias, prevenção e cuidados com a respiração.',
     imagemCapa: imgRespiracao,
-    progresso: 30,
+    espelharImagemCapa: true,
+    progresso: 0,
     episodios: [
       {
-        id: 'ep1',
+        id: '8e18bbal1ac',
         numero: 1,
-        titulo: 'Técnicas de Respiração Diagragmática',
-        descricao: 'Aprenda a respirar usando o diafragma para reduzir o estresse e melhorar a oxigenação.',
-        duracao: '5 min',
-        concluido: true,
+        titulo: 'Aumento de casos de síndrome respiratória aguda grave (SRAG)',
+        descricao: 'Conteúdo educativo sobre o aumento de casos de SRAG.',
+        youtubeId: '8e18bBA11Ac',
+        concluido: false,
+        thumb: imgRespiracao
+      },
+      {
+        id: '7u4gu3a-x40',
+        numero: 2,
+        titulo: 'DPOC: 3 fatos que você precisa saber sobre essa condição respiratória grave',
+        descricao: 'Vídeo educativo sobre doença pulmonar obstrutiva crônica (DPOC).',
+        youtubeId: '7U4gu3a-x40',
+        concluido: false,
+        thumb: imgRespiracao
+      },
+      {
+        id: 'vusjxamq-zc',
+        numero: 3,
+        titulo: 'Diferença entre alergia respiratória e resfriado | Coluna #116',
+        descricao: 'Conteúdo educativo sobre diferenças entre alergia respiratória e resfriado.',
+        youtubeId: 'VuSJXamq-Zc',
+        concluido: false,
+        thumb: imgRespiracao
+      },
+      {
+        id: 'guye1ajfcpu',
+        numero: 4,
+        titulo: 'Proteja-se do vírus sincicial respiratório e outras doenças respiratórias',
+        descricao: 'Orientações educativas sobre prevenção de doenças respiratórias.',
+        youtubeId: 'GUyE1AJfCPU',
+        concluido: false,
         thumb: imgRespiracao
       }
     ]

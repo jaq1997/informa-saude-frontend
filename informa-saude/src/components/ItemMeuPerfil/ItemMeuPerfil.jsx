@@ -1,4 +1,3 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
 
@@ -9,32 +8,35 @@ export function ItemMeuPerfil({
   descricao,
   to,
   onClick,
-  perigo = false
+  perigo = false,
+  desabilitado = false,
 }) {
   const conteudoInner = (
     <>
-      <div className="d-flex align-items-center gap-3 flex-grow-1 text-start">
+      <div className="is-profile-option-content text-start">
         {icone && (
-          <div className="is-icon-chip mb-0 rounded-circle is-profile-icon flex-shrink-0">
+          <div className="is-icon-chip mb-0 rounded-circle is-profile-icon">
             {icone}
           </div>
         )}
-        <div className="flex-grow-1 text-start">
-          <span className={`fw-bold fs-5 d-block ${perigo ? 'text-danger' : 'text-dark'}`}>
+        <div className="is-profile-option-copy">
+          <span className={`is-profile-option-title fw-bold d-block ${perigo ? 'text-danger' : 'text-dark'}`}>
             {titulo}
           </span>
           {descricao && (
-            <span className="text-muted fs-6 d-block">{descricao}</span>
+            <span className="is-profile-option-description text-muted d-block">{descricao}</span>
           )}
         </div>
       </div>
-      <ChevronRight size={22} className="text-muted ms-2 flex-shrink-0" />
+      {!desabilitado && (
+        <ChevronRight size={22} className="text-muted ms-2 mt-1 flex-shrink-0" />
+      )}
     </>
   );
 
-  const classeBase = "d-flex align-items-center justify-content-between p-3 rounded-3 bg-light text-decoration-none text-dark border w-100 text-start transition-all";
+  const classeBase = `is-profile-option d-flex align-items-start justify-content-between p-3 rounded-3 bg-light text-decoration-none text-dark border w-100 text-start transition-all ${perigo ? 'is-danger' : ''} ${desabilitado ? 'opacity-75 cursor-default' : ''}`;
 
-  if (to) {
+  if (to && !desabilitado) {
     return (
       <Link to={to} className={classeBase}>
         {conteudoInner}
@@ -43,7 +45,12 @@ export function ItemMeuPerfil({
   }
 
   return (
-    <button type="button" onClick={onClick} className={classeBase}>
+    <button
+      type="button"
+      onClick={desabilitado ? undefined : onClick}
+      disabled={desabilitado}
+      className={classeBase}
+    >
       {conteudoInner}
     </button>
   );

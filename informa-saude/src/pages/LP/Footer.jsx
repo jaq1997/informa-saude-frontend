@@ -5,7 +5,6 @@ export function Footer() {
     <footer className="is-footer-green pt-5 pb-4 mt-auto" id="contato">
       <div className="is-container">
         <div className="row g-4 justify-content-between">
-          {/* Brand Frame (Logo + Descrição) */}
           <div className="col-12 col-md-4 col-lg-3 d-flex flex-column gap-3">
             <Logo to="/" className="is-logo-white is-footer-logo" />
             <p className="text-white fs-6 lh-base mb-0">
@@ -13,7 +12,6 @@ export function Footer() {
             </p>
           </div>
 
-          {/* Frame Navegação */}
           <div className="col-6 col-md-3 col-lg-2 d-flex flex-column gap-3">
             <h3 className="fw-bold mb-0 text-white fs-6 text-uppercase" style={{ letterSpacing: '0.08em' }}>
               Navegação
@@ -44,7 +42,6 @@ export function Footer() {
             </nav>
           </div>
 
-          {/* Frame Canais de Ajuda */}
           <div className="col-6 col-md-3 col-lg-3 d-flex flex-column gap-3">
             <h3 className="fw-bold mb-0 text-white fs-6 text-uppercase" style={{ letterSpacing: '0.08em' }}>
               Canais de Ajuda
@@ -55,7 +52,6 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Frame Projeto */}
           <div className="col-12 col-md-2 col-lg-3 d-flex flex-column gap-3">
             <h3 className="fw-bold mb-0 text-white fs-6 text-uppercase" style={{ letterSpacing: '0.08em' }}>
               Projeto
@@ -67,7 +63,6 @@ export function Footer() {
           </div>
         </div>
 
-        {/* Divisor + Direitos Autorais */}
         <div className="border-top border-white border-opacity-25 mt-5 pt-3 text-center text-white fs-6">
           © 2026 Informa Saúde. Todos os direitos reservados.
         </div>

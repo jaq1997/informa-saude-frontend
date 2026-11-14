@@ -1,7 +1,6 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import { Play } from "lucide-react";
-import { BotaoSistema } from "../Botao/BotaoSistema";
+import { Link } from 'react-router-dom';
+import { Play } from 'lucide-react';
+import { BotaoSistema } from '../Botao/BotaoSistema';
 
 export function CardSistema({
   isAcao = false,

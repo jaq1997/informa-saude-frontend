@@ -1,4 +1,3 @@
-import React from 'react';
 import { AvatarUsuario } from '../AvatarUsuario/AvatarUsuario';
 
 export function CardPerfilSidebar({

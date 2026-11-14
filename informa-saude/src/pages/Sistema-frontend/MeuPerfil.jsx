@@ -1,7 +1,12 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User, Settings, KeyRound, LogOut } from 'lucide-react';
-import fotoPerfilInicial from '../../assets/images/foto-perfil.webp';
+
+import { useUser } from '../../context/userContextStore';
+import { enviarFotoPerfil, removerFotoPerfil } from '../../api/api';
+import { obterFotoPerfil, salvarFotoPerfil } from '../../utils/fotoPerfil';
+import { resolverFoto } from '../../utils/usuario';
+
 import {
   SystemNavbar,
   ItemMeuPerfil,
@@ -9,35 +14,51 @@ import {
   TituloPaginaSistema,
   CardPerfilSidebar,
   ModalAlterarSenha,
-  ModalConfirmacao
+  ModalConfirmacao,
 } from '../../components';
-import { obterNomeUsuario, obterEmailUsuario } from '../../utils/usuario';
 
 export function MeuPerfil() {
   const navigate = useNavigate();
-  const nomeUsuario = obterNomeUsuario();
-  const emailUsuario = obterEmailUsuario();
+  const { usuario, atualizarUsuario, sair } = useUser();
+
+  const nomeUsuario = usuario?.nome ?? '';
+  const emailUsuario = usuario?.email ?? '';
+  const isGoogle = usuario?.provider === 'GOOGLE';
+
   const [modalSair, setModalSair] = useState(false);
   const [modalSenha, setModalSenha] = useState(false);
-  const [foto, setFoto] = useState(() => {
-    const fotoSalva = localStorage.getItem('informa-saude-foto-perfil');
-    if (fotoSalva === 'null') return null;
-    return fotoSalva || fotoPerfilInicial;
-  });
+  const [foto, setFoto] = useState(() =>
+    obterFotoPerfil() ?? resolverFoto(usuario?.avatar_url)
+  );
   const [toastMsg, setToastMsg] = useState(null);
 
+  useEffect(() => {
+    const atualizarFoto = () => {
+      const fotoLocal = obterFotoPerfil();
+      setFoto(fotoLocal ?? resolverFoto(usuario?.avatar_url));
+    };
+
+    window.addEventListener('storage', atualizarFoto);
+    window.addEventListener('foto-perfil-atualizada', atualizarFoto);
+
+    atualizarFoto();
+
+    return () => {
+      window.removeEventListener('storage', atualizarFoto);
+      window.removeEventListener('foto-perfil-atualizada', atualizarFoto);
+    };
+  }, [usuario?.avatar_url, usuario?.email, usuario?.usuario_id]);
+
   const atualizarFotoPerfil = (novaFoto) => {
-    setFoto(novaFoto);
-    if (novaFoto) {
-      localStorage.setItem('informa-saude-foto-perfil', novaFoto);
-    } else {
-      localStorage.setItem('informa-saude-foto-perfil', 'null');
-    }
+    salvarFotoPerfil(novaFoto);
+    setFoto(novaFoto ?? resolverFoto(usuario?.avatar_url));
+
     window.dispatchEvent(new Event('foto-perfil-atualizada'));
   };
 
   const handleConfirmarSair = () => {
     setModalSair(false);
+    sair();
     navigate('/');
   };
 
@@ -58,20 +79,42 @@ export function MeuPerfil() {
               email={emailUsuario}
               foto={foto}
               podeEditar
-              onAlterarFoto={(novaUrl) => {
-                atualizarFotoPerfil(novaUrl);
-                setToastMsg('Foto de perfil atualizada!');
+              onAlterarFoto={async (novaUrl, arquivo) => {
+                if (arquivo) {
+                  try {
+                    const resp = await enviarFotoPerfil(arquivo);
+                    atualizarUsuario({ avatar_url: resp.avatar_url });
+                    setFoto(resp.avatar_url);
+                    salvarFotoPerfil(null);
+                    setToastMsg(
+                      'Foto de perfil salva com sucesso no Cloudflare!'
+                    );
+                  } catch (e) {
+                    setToastMsg(e.message || 'Erro ao salvar foto.');
+                  }
+                } else {
+                  atualizarFotoPerfil(novaUrl);
+                  setToastMsg('Foto de perfil atualizada!');
+                }
               }}
-              onRemoverFoto={() => {
-                atualizarFotoPerfil(null);
-                setToastMsg('Foto removida com sucesso!');
+              onRemoverFoto={async () => {
+                try {
+                  await removerFotoPerfil();
+                  atualizarUsuario({ avatar_url: null });
+                  atualizarFotoPerfil(null);
+                  setToastMsg('Foto removida com sucesso!');
+                } catch (e) {
+                  setToastMsg(e.message || 'Erro ao remover foto.');
+                }
               }}
             />
           </div>
 
           <div className="col-12 col-lg-8">
             <div className="bg-white rounded-4 shadow-sm p-4 border-0">
-              <h4 className="fw-bold text-dark fs-4 mb-4">Opções da Conta</h4>
+              <h4 className="fw-bold text-dark fs-4 mb-4">
+                Opções da Conta
+              </h4>
 
               <div className="d-flex flex-column gap-3">
                 <ItemMeuPerfil
@@ -91,8 +134,13 @@ export function MeuPerfil() {
                 <ItemMeuPerfil
                   icone={<KeyRound size={22} />}
                   titulo="Alterar Senha"
-                  descricao="Atualizar sua senha de acesso ao sistema"
-                  onClick={() => setModalSenha(true)}
+                  descricao={
+                    isGoogle
+                      ? "Sua conta é acessada diretamente pelo Google. Não é necessário gerenciar senha."
+                      : "Atualizar sua senha de acesso ao sistema"
+                  }
+                  onClick={isGoogle ? undefined : () => setModalSenha(true)}
+                  desabilitado={isGoogle}
                 />
 
                 <ItemMeuPerfil
@@ -111,7 +159,9 @@ export function MeuPerfil() {
       <ModalAlterarSenha
         aberto={modalSenha}
         onClose={() => setModalSenha(false)}
-        onSalvo={() => setToastMsg('Senha alterada com sucesso!')}
+        onSalvo={() =>
+          setToastMsg('Senha alterada com sucesso!')
+        }
       />
 
       <ModalConfirmacao

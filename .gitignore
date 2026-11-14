@@ -10,3 +10,11 @@ informa-saude/src/assets/images/*.jpeg
 informa-saude/src/assets/images/*.png
 *.jpg
 *.jpeg
+.env
+.env.*
+!.env.example
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/

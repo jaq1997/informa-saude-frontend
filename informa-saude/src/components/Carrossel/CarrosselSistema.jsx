@@ -33,11 +33,16 @@ export function CarrosselSistema({
       <div className="carousel-inner">
         {slides.map((slide, index) => (
           <div key={slide.id || index} className={`carousel-item ${index === 0 ? 'active' : ''}`}>
-            <img
-              src={slide.img}
-              alt={slide.alt}
-              className={`${alturaImagem} w-100 d-block object-fit-cover`}
-            />
+            <picture>
+              {slide.mobileImg && (
+                <source media="(max-width: 767.98px)" srcSet={slide.mobileImg} />
+              )}
+              <img
+                src={slide.img}
+                alt={slide.alt}
+                className={`${alturaImagem} w-100 d-block`}
+              />
+            </picture>
           </div>
         ))}
       </div>

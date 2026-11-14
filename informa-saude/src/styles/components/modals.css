@@ -183,4 +183,42 @@
   transform: rotate(180deg);
 }
 
+.is-modal-rede-saude {
+  width: min(860px, calc(100vw - 3rem));
+  max-width: none;
+  max-height: min(82vh, 680px);
+  max-height: min(82dvh, 680px);
+}
 
+.is-modal-rede-saude > .is-modal-rede-saude-content {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.is-location-search-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--is-text-secondary);
+  font-size: 0.875rem;
+  white-space: nowrap;
+}
+
+.is-location-search-divider::before,
+.is-location-search-divider::after {
+  content: '';
+  flex: 1 1 auto;
+  border-top: 1px solid var(--is-border);
+}
+
+@media (max-width: 575.98px) {
+  .is-modal-rede-saude {
+    width: calc(100vw - 2rem);
+    max-height: calc(100vh - 2rem);
+    max-height: calc(100dvh - 2rem);
+    padding: 1rem !important;
+  }
+}

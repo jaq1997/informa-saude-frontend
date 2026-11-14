@@ -1,4 +1,3 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
 import { Stethoscope } from 'lucide-react';
 import { CardSistema, BotaoSistema } from '../../components';

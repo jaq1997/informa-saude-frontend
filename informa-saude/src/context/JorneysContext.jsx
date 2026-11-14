@@ -1,62 +1,95 @@
-import { createContext, useContext, useReducer, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { buscarDashboard } from "../api/api";
+import { JornadasContext } from "./jornadasContextStore";
 
 const estadoInicial = {
-  diasAprendidos: 241,
-  progressoSemanal: [true, true, true, true, false, false, false],
-  xpHistorico: [1636, 707, 1636],
-  jornadas: 6,
-  minutos: 63,
+  diasAprendidos: 0,
+  progressoSemanal: [false, false, false, false, false, false, false],
+  xpHistorico: [0, 0, 0],
+  jornadas: 0,
+  aulasConcluidas: 0,
+  minutos: 0,
 };
 
-const JornadasContext = createContext(undefined);
-
-function reducer(state, action) {
-  if (action.type !== "jornada-completa") return state;
-
-  const proximoProgresso = [...state.progressoSemanal];
-  const proximoDia = proximoProgresso.findIndex((completo) => !completo);
-
-  if (proximoDia >= 0) proximoProgresso[proximoDia] = true;
-
-  // Atualiza com segurança o último elemento do XP ou cria um novo
-  const novoXpHistorico = [...state.xpHistorico];
-  if (novoXpHistorico.length > 0) {
-    novoXpHistorico[novoXpHistorico.length - 1] += 320;
-  } else {
-    novoXpHistorico.push(320);
-  }
-
-  return {
-    ...state, 
-    diasAprendidos: state.diasAprendidos + (proximoDia >= 0 ? 1 : 0),
-    progressoSemanal: proximoProgresso,
-    xpHistorico: novoXpHistorico,
-    jornadas: state.jornadas + 1,
-    minutos: state.minutos + 18,
-  };
-}
-
 export function JornadasProvider({ children }) {
-  const [state, dispatch] = useReducer(reducer, estadoInicial);
+  const [dashboard, setDashboard] = useState(estadoInicial);
+  const [carregando, setCarregando] = useState(true);
+  const [erro, setErro] = useState(null);
 
-  // useMemo impede re-renders desnecessários em componentes filhos
-  const value = useMemo(() => ({
-    ...state,
-    jornadaCompleta: () => dispatch({ type: "jornada-completa" })
-  }), [state]);
+  const atualizarDashboard = useCallback(async () => {
+    setCarregando(true);
+    setErro(null);
+
+    try {
+      const dados = await buscarDashboard();
+
+      setDashboard({
+        diasAprendidos: dados.diasAprendidos,
+        progressoSemanal: dados.progressoSemanal,
+        xpHistorico: dados.xpHistorico,
+        jornadas: dados.jornadas,
+        aulasConcluidas: dados.aulasConcluidas,
+        minutos: dados.minutos,
+      });
+    } catch (error) {
+      setDashboard(estadoInicial);
+      setErro(error.message || "Erro ao carregar o Dashboard.");
+    } finally {
+      setCarregando(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    let ativo = true;
+
+    async function carregarDashboardInicial() {
+      try {
+        const dados = await buscarDashboard();
+
+        if (!ativo) return;
+
+        setDashboard({
+          diasAprendidos: dados.diasAprendidos,
+          progressoSemanal: dados.progressoSemanal,
+          xpHistorico: dados.xpHistorico,
+          jornadas: dados.jornadas,
+          aulasConcluidas: dados.aulasConcluidas,
+          minutos: dados.minutos,
+        });
+
+        setErro(null);
+      } catch (error) {
+        if (!ativo) return;
+
+        setDashboard(estadoInicial);
+        setErro(error.message || "Erro ao carregar o Dashboard.");
+      } finally {
+        if (ativo) {
+          setCarregando(false);
+        }
+      }
+    }
+
+    carregarDashboardInicial();
+
+    return () => {
+      ativo = false;
+    };
+  }, []);
+
+  const value = useMemo(
+    () => ({
+      ...dashboard,
+      carregando,
+      erro,
+      atualizarDashboard,
+    }),
+    [dashboard, carregando, erro, atualizarDashboard]
+  );
 
   return (
     <JornadasContext.Provider value={value}>
       {children}
     </JornadasContext.Provider>
   );
-}
-
-export function useJornadas() {
-  const contexto = useContext(JornadasContext);
-
-  if (!contexto) {
-    throw new Error("useJornadas deve ser usado dentro de um JornadasProvider");
-  }
-  return contexto;
 }

@@ -1,4 +1,4 @@
-import { useJornadas } from '../../context/JorneysContext';
+import { useJornadas } from '../../context/jornadasContextStore';
 import { Check } from 'lucide-react';
 
 const dias = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"];

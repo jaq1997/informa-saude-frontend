@@ -1,5 +1,3 @@
-import React from 'react';
-
 export function BotaoLP({
   children,
   onClick,
@@ -31,7 +29,8 @@ export function BotaoLP({
     }
   };
 
-  const classes = `${baseClass} ${obterClasseVariante()} ${larguraTotal ? 'w-100' : ''} ${className}`;
+  const classeTamanho = tamanho === 'sm' ? 'is-btn-sm' : '';
+  const classes = `${baseClass} ${obterClasseVariante()} ${classeTamanho} ${larguraTotal ? 'w-100' : ''} ${className}`;
 
   if (href) {
     return (
