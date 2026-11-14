@@ -12,17 +12,23 @@ export default function CardStat({ type }) {
     ? estado.jornadas
     : estado.minutos;
 
+  const aulasConcluidas = estado.aulasConcluidas ?? 0;
+
   const titulo = isJornadas
     ? `${valor} ${valor === 1 ? "Jornada de conteúdo" : "Jornadas de conteúdo"}`
     : `${valor} ${valor === 1 ? "minuto" : "minutos"}`;
 
   const descricao = isJornadas
-    ? valor === 0
-      ? "Você ainda não iniciou nenhuma jornada. Que tal começar?"
-      : "Continue explorando conteúdos e ampliando seus conhecimentos."
+    ? aulasConcluidas === 0
+      ? valor === 0
+        ? "Você ainda não iniciou nenhuma jornada. Que tal começar?"
+        : "Você ainda não concluiu nenhuma aula. Continue aprendendo!"
+      : `Você concluiu ${aulasConcluidas} ${
+          aulasConcluidas === 1 ? "aula" : "aulas"
+        } até agora. Continue aprendendo!`
     : valor === 0
-      ? "Seu tempo de aprendizado aparecerá aqui quando você iniciar suas atividades."
-      : "Tempo total dedicado às suas atividades de aprendizado.";
+      ? "A duração das aulas concluídas aparecerá aqui."
+      : "Duração total das aulas que você concluiu.";
 
   return (
     <article className="dashboard-card stat-card">

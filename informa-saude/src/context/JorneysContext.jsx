@@ -7,6 +7,7 @@ const estadoInicial = {
   progressoSemanal: [false, false, false, false, false, false, false],
   xpHistorico: [0, 0, 0],
   jornadas: 0,
+  aulasConcluidas: 0,
   minutos: 0,
 };
 
@@ -27,6 +28,7 @@ export function JornadasProvider({ children }) {
         progressoSemanal: dados.progressoSemanal,
         xpHistorico: dados.xpHistorico,
         jornadas: dados.jornadas,
+        aulasConcluidas: dados.aulasConcluidas,
         minutos: dados.minutos,
       });
     } catch (error) {
@@ -51,6 +53,7 @@ export function JornadasProvider({ children }) {
           progressoSemanal: dados.progressoSemanal,
           xpHistorico: dados.xpHistorico,
           jornadas: dados.jornadas,
+          aulasConcluidas: dados.aulasConcluidas,
           minutos: dados.minutos,
         });
 
