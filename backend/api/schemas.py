@@ -1,7 +1,7 @@
 from datetime import date, datetime
-from typing import Annotated
+from typing import Annotated, Any
 
-from pydantic import AfterValidator, BaseModel, EmailStr, Field
+from pydantic import AfterValidator, BeforeValidator, BaseModel, EmailStr, Field
 
 
 MAX_BYTES_SENHA = 72
@@ -19,12 +19,31 @@ def _cabe_no_bcrypt(valor: str) -> str:
     return valor
 
 
+def _converter_data(valor: Any) -> date | None:
+    if valor is None or valor == "":
+        return None
+    if isinstance(valor, date):
+        return valor
+    if isinstance(valor, str):
+        valor = valor.strip()
+        if not valor:
+            return None
+        for formato in ("%d/%m/%Y", "%d-%m-%Y", "%Y-%m-%d"):
+            try:
+                return datetime.strptime(valor, formato).date()
+            except ValueError:
+                continue
+        raise ValueError("Data de nascimento inválida. Use o formato DD/MM/AAAA.")
+    return None
+
+
 Email = Annotated[EmailStr, AfterValidator(_minusculo)]
 SenhaNova = Annotated[
     str,
     Field(min_length=8, max_length=72),
     AfterValidator(_cabe_no_bcrypt),
 ]
+DataFlexivel = Annotated[date | None, BeforeValidator(_converter_data)]
 
 
 class UserCreate(BaseModel):
@@ -32,8 +51,16 @@ class UserCreate(BaseModel):
     email: Email
     senha: SenhaNova
     sexo: str
-    data_nascimento: date | None = None
+    data_nascimento: DataFlexivel = None
     telefone: str | None = None
+
+
+class UserUpdate(BaseModel):
+    nome: str | None = Field(default=None, min_length=1, max_length=120)
+    email: Email | None = None
+    sexo: str | None = Field(default=None, max_length=50)
+    data_nascimento: DataFlexivel = None
+    telefone: str | None = Field(default=None, max_length=30)
 
 
 class AlterarSenha(BaseModel):
