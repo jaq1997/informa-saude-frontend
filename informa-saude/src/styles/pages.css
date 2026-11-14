@@ -83,6 +83,20 @@
   z-index: 0;
 }
 
+.is-jornada-card--espelhada .is-card-bg-img {
+  transform: scaleX(-1);
+}
+
+.is-progress-card .is-card-bg-img {
+  object-position: center 20%;
+}
+
+@media (min-width: 768px) {
+  .is-progress-card {
+    min-height: 460px;
+  }
+}
+
 .is-jornada-content,
 .is-hero-content {
   position: relative;
@@ -320,7 +334,7 @@
   overflow: hidden;
   display: flex;
   align-items: center;
-  min-height: 420px;
+  min-height: clamp(520px, 76vh, 640px);
   background-color: var(--is-green-dark);
   width: 100%;
 }
@@ -339,14 +353,18 @@
   top: 0;
   right: 0;
   height: 100%;
-  width: 60%;
+  width: 100%;
 }
 
 .is-jornada-hero-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center top;
+  object-position: center 30%;
+}
+
+.is-jornada-hero-img--espelhada {
+  transform: scaleX(-1);
 }
 
 .is-jornada-hero-overlay {
@@ -355,7 +373,9 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(to right, var(--is-green-dark) 0%, rgba(0, 72, 64, 0.6) 40%, transparent 100%);
+  background:
+    linear-gradient(90deg, rgba(0, 72, 64, 1) 0%, rgba(0, 72, 64, 0.96) 28%, rgba(0, 72, 64, 0.78) 48%, rgba(0, 72, 64, 0.3) 72%, rgba(0, 72, 64, 0.08) 100%),
+    linear-gradient(0deg, rgba(0, 72, 64, 0.55) 0%, transparent 42%);
 }
 
 .is-jornada-hero-mobile-img {
@@ -365,13 +385,32 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  opacity: 0.3;
+  opacity: 0.5;
+  object-position: center 50%;
+}
+
+.is-jornada-hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: transparent;
+}
+
+.is-jornada-hero > .is-container {
+  z-index: 2;
 }
 
 .is-jornada-hero-content {
   position: relative;
   z-index: 2;
-  max-width: 640px;
+  max-width: 680px;
+}
+
+.is-jornada-hero-title {
+  font-size: clamp(2.25rem, 5vw, 3.75rem);
+  text-wrap: balance;
 }
 
 .is-jornada-back-link {
@@ -394,6 +433,12 @@
   font-weight: 700;
 }
 
+.is-jornada-section-title {
+  color: var(--is-white);
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  line-height: 1.25;
+}
+
 .is-jornada-hero-subtitle {
   color: var(--is-white);
   font-size: 1.2rem;
@@ -414,33 +459,6 @@
   font-size: 1rem;
   font-weight: 700;
   color: var(--is-white);
-}
-
-.is-jornada-tabs-nav {
-  border-bottom: 2px solid rgba(255, 255, 255, 0.2);
-  margin-bottom: 1.5rem;
-}
-
-.is-jornada-tab-btn {
-  background: transparent;
-  border: none;
-  border-bottom: 3px solid transparent;
-  color: var(--is-white);
-  opacity: 0.6;
-  font-size: 1.1rem;
-  font-weight: 700;
-  padding: 0 0 1rem 0;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.is-jornada-tab-btn:hover {
-  opacity: 0.9;
-}
-
-.is-jornada-tab-btn.is-active {
-  opacity: 1;
-  border-bottom-color: var(--is-orange);
 }
 
 .is-jornada-episode-item {
@@ -479,6 +497,11 @@
   background: transparent;
 }
 
+.is-jornada-video-thumbnail:focus-visible {
+  outline: 3px solid var(--is-orange);
+  outline-offset: -3px;
+}
+
 .is-jornada-thumbnail-image {
   position: relative;
   z-index: 1;
@@ -486,6 +509,32 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.is-jornada-episode-title {
+  margin: 0 0 0.5rem;
+  color: var(--is-white);
+  font-size: 1.125rem;
+  font-weight: 700;
+  line-height: 1.4;
+  text-wrap: balance;
+}
+
+.is-jornada-episode-description {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.is-jornada-youtube-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 44px;
+  color: #ffb267;
+  font-weight: 700;
+  text-underline-offset: 0.2em;
 }
 
 .is-video-modal-overlay {
@@ -502,22 +551,35 @@
 .is-video-modal {
   position: relative;
   width: min(100%, 1100px);
+  max-height: calc(100vh - 4rem);
+  max-height: calc(100dvh - 4rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
   color: #fff;
 }
 
 .is-video-modal-close {
   position: absolute;
-  top: -3rem;
-  right: 0;
+  top: 0.5rem;
+  right: 0.5rem;
+  z-index: 2;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 2.75rem;
+  height: 2.75rem;
   border: 1px solid rgba(255, 255, 255, 0.7);
   border-radius: 50%;
   color: #fff;
   background: rgba(0, 0, 0, 0.4);
+}
+
+.is-video-modal-close:focus-visible,
+.is-video-modal-link:focus-visible,
+.is-jornada-back-link:focus-visible,
+.is-jornada-youtube-link:focus-visible {
+  outline: 3px solid #ffb267;
+  outline-offset: 3px;
 }
 
 .is-video-modal-player {
@@ -568,10 +630,6 @@
     padding: 1rem;
   }
 
-  .is-video-modal-close {
-    top: -3.25rem;
-  }
-
   .is-video-modal-title {
     font-size: 1rem;
   }
@@ -592,36 +650,144 @@
   box-shadow: var(--is-shadow-sm);
 }
 
-.is-jornada-other-card {
-  position: relative;
-  border-radius: 1rem;
-  overflow: hidden;
-  height: 210px;
-  background-color: var(--is-green);
-  box-shadow: var(--is-shadow-md);
-  text-decoration: none;
-  display: block;
-}
-
-.is-jornada-other-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(to top, rgba(0, 30, 25, 0.9) 0%, rgba(0, 72, 64, 0.3) 60%, transparent 100%);
-  z-index: 1;
-}
-
-.is-jornada-other-content {
-  padding: 1.5rem;
-  position: relative;
+.is-jornada-other-links {
   display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  height: 100%;
-  z-index: 2;
+  flex-wrap: wrap;
+  gap: 0.75rem 2rem;
+}
+
+.is-jornada-other-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--is-white);
+  font-size: 1.0625rem;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.is-jornada-other-link:hover {
+  color: #ffb267;
 }
+
+html.alto-contraste .is-jornada-page,
+html.alto-contraste .is-jornada-page .is-jornada-hero,
+html.alto-contraste .is-jornada-page main {
+  background-color: var(--is-contrast-background) !important;
+  color: var(--is-contrast-text) !important;
+}
+
+html.alto-contraste .is-jornada-hero::after {
+  background: linear-gradient(90deg, #000 0%, rgba(0, 0, 0, 0.94) 45%, rgba(0, 0, 0, 0.7) 100%);
+}
+
+html.alto-contraste .is-jornada-hero-overlay {
+  background: transparent;
+}
+
+html.alto-contraste .is-jornada-episode-item {
+  background: transparent !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--is-contrast-accent) !important;
+  border-radius: 0 !important;
+}
+
+html.alto-contraste .is-jornada-thumb-container {
+  background-color: var(--is-contrast-surface) !important;
+}
+
+html.alto-contraste .is-jornada-video-thumbnail:focus-visible {
+  outline: 3px solid var(--is-contrast-accent);
+  outline-offset: -3px;
+}
+
+html.alto-contraste .is-jornada-hero-title,
+html.alto-contraste .is-jornada-section-title {
+  color: var(--is-contrast-accent) !important;
+}
+
+html.alto-contraste .is-jornada-page .is-jornada-back-link,
+html.alto-contraste .is-jornada-page .is-jornada-episode-title,
+html.alto-contraste .is-jornada-page .is-jornada-episode-description,
+html.alto-contraste .is-jornada-page .is-jornada-meta {
+  color: var(--is-contrast-text) !important;
+}
+
+html.alto-contraste .is-jornada-page .is-jornada-youtube-link,
+html.alto-contraste .is-jornada-page .text-is-orange {
+  color: var(--is-contrast-accent) !important;
+}
+
+html.alto-contraste .is-jornada-page .is-jornada-hero .is-btn--orange,
+html.alto-contraste .is-jornada-page .is-jornada-hero .is-btn--orange span,
+html.alto-contraste .is-jornada-page .is-jornada-hero .is-btn--orange svg {
+  color: var(--is-contrast-on-accent) !important;
+}
+
+html.alto-contraste .is-jornada-page .is-dropdown-trigger {
+  background-color: var(--is-contrast-background) !important;
+  border: 2px solid var(--is-contrast-accent) !important;
+  color: var(--is-contrast-text) !important;
+}
+
+html.alto-contraste .is-jornada-page .is-dropdown-trigger span {
+  color: var(--is-contrast-text) !important;
+}
+
+html.alto-contraste .is-jornada-page .is-dropdown-trigger svg {
+  color: var(--is-contrast-accent) !important;
+}
+
+html.alto-contraste .is-jornada-page .dropdown-item.active {
+  background-color: var(--is-contrast-accent) !important;
+  color: var(--is-contrast-on-accent) !important;
+}
+
+html.alto-contraste .is-jornada-page .is-jornada-other-link:focus-visible,
+html.alto-contraste .is-jornada-page .is-dropdown-trigger:focus-visible,
+html.alto-contraste .is-jornada-page .dropdown-item:focus-visible {
+  outline: 3px solid var(--is-contrast-accent);
+  outline-offset: 3px;
+}
+
+html.alto-contraste .is-jornada-page .is-jornada-other-link:hover {
+  color: var(--is-contrast-accent) !important;
+}
+
+html.alto-contraste .button-recover-password {
+  background: transparent !important;
+  color: var(--is-contrast-accent) !important;
+}
+
+.is-google-login iframe:focus-visible {
+  outline: 3px solid var(--is-orange);
+  outline-offset: 3px;
+}
+
+.is-jornada-other-link:focus-visible,
+.is-jornada-back-link:focus-visible {
+  outline: 3px solid var(--is-orange);
+  outline-offset: 3px;
+}
+
+@media (max-width: 767.98px) {
+  .is-jornada-hero {
+    min-height: 0;
+  }
+
+  .is-jornada-hero-content {
+    max-width: 100%;
+  }
+
+  .is-jornada-episode-item {
+    padding-block: 1.25rem;
+  }
+
+  .is-jornada-hero::after {
+    background: linear-gradient(90deg, rgba(0, 72, 64, 0.72), rgba(0, 72, 64, 0.4));
+  }
+}
 
 .is-questionnaire {
   background-color: var(--is-surface-muted);

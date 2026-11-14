@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Play, ArrowLeft, ExternalLink, X } from 'lucide-react';
 import { JORNADAS_DATA } from '../../data/jornadasData';
@@ -12,30 +12,55 @@ import {
 export function JornadaDetalhes({ jornadaData: propJornada }) {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [abaAtiva, setAbaAtiva] = useState('episodios');
   const [videoAtivoId, setVideoAtivoId] = useState(null);
+  const videoDialogRef = useRef(null);
+  const videoCloseButtonRef = useRef(null);
+  const videoTriggerRef = useRef(null);
 
   const jornadaId = propJornada?.id || id || 'cardiaca';
   const jornada = propJornada || JORNADAS_DATA[jornadaId] || JORNADAS_DATA.cardiaca;
+  const imagemEspelhada = jornada.espelharImagemCapa;
 
   const episodios = jornada.episodios || [];
   const videoAtivo = episodios.find((episodio) => episodio.id === videoAtivoId);
-  const noticias = jornada.noticias || [];
-
   useEffect(() => {
     if (!videoAtivo) return undefined;
 
     const overflowAnterior = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
+    videoCloseButtonRef.current?.focus();
 
-    const fecharComEscape = (event) => {
-      if (event.key === 'Escape') setVideoAtivoId(null);
+    const controlarTeclado = (event) => {
+      if (event.key === 'Escape') {
+        setVideoAtivoId(null);
+        return;
+      }
+
+      if (event.key !== 'Tab') return;
+
+      const elementosFocaveis = videoDialogRef.current?.querySelectorAll(
+        'button:not(:disabled), a[href], iframe, [tabindex]:not([tabindex="-1"])'
+      );
+      if (!elementosFocaveis?.length) return;
+
+      const primeiroElemento = elementosFocaveis[0];
+      const ultimoElemento = elementosFocaveis[elementosFocaveis.length - 1];
+      const focoForaDoDialogo = !videoDialogRef.current.contains(document.activeElement);
+
+      if (event.shiftKey && (document.activeElement === primeiroElemento || focoForaDoDialogo)) {
+        event.preventDefault();
+        ultimoElemento.focus();
+      } else if (!event.shiftKey && (document.activeElement === ultimoElemento || focoForaDoDialogo)) {
+        event.preventDefault();
+        primeiroElemento.focus();
+      }
     };
-    window.addEventListener('keydown', fecharComEscape);
+    window.addEventListener('keydown', controlarTeclado);
 
     return () => {
       document.body.style.overflow = overflowAnterior;
-      window.removeEventListener('keydown', fecharComEscape);
+      window.removeEventListener('keydown', controlarTeclado);
+      if (videoTriggerRef.current?.isConnected) videoTriggerRef.current.focus();
     };
   }, [videoAtivo]);
 
@@ -57,8 +82,8 @@ export function JornadaDetalhes({ jornadaData: propJornada }) {
             <div className="is-jornada-hero-img-wrapper d-none d-md-block">
               <img
                 src={jornada.imagemCapa}
-                alt={jornada.titulo}
-                className="is-jornada-hero-img"
+                alt=""
+                className={`is-jornada-hero-img ${imagemEspelhada ? 'is-jornada-hero-img--espelhada' : ''}`}
               />
               <div className="is-jornada-hero-overlay" />
             </div>
@@ -66,7 +91,7 @@ export function JornadaDetalhes({ jornadaData: propJornada }) {
             <img
               src={jornada.imagemCapa}
               alt=""
-              className="is-jornada-hero-mobile-img d-md-none"
+              className={`is-jornada-hero-mobile-img d-md-none ${imagemEspelhada ? 'is-jornada-hero-img--espelhada' : ''}`}
             />
           </div>
         )}
@@ -107,7 +132,6 @@ export function JornadaDetalhes({ jornadaData: propJornada }) {
             <BotaoSistema
               variante="orange"
               onClick={() => {
-                setAbaAtiva('episodios');
                 setVideoAtivoId(episodios[0]?.id);
                 document.getElementById('jornada-episodios')?.scrollIntoView({ behavior: 'smooth' });
               }}
@@ -120,144 +144,94 @@ export function JornadaDetalhes({ jornadaData: propJornada }) {
       </section>
 
       <main className="is-container pt-5">
-        <div className="is-jornada-tabs-nav">
-          <div className="d-flex gap-4">
-            {[
-              { key: 'episodios', label: `Episódios ${String(episodios.length).padStart(2, '0')}` },
-              { key: 'noticias', label: 'Notícias relacionadas' },
-            ].map(({ key, label }) => (
-              <button
-                key={key}
-                onClick={() => setAbaAtiva(key)}
-                className={`is-jornada-tab-btn ${abaAtiva === key ? 'is-active' : ''}`}
-              >
-                {label}
-              </button>
+        <section
+          className="mb-5"
+          id="jornada-episodios"
+          aria-labelledby="jornada-episodios-titulo"
+        >
+          <div className="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+            <div>
+              <h2 className="is-jornada-section-title fw-bold mb-1" id="jornada-episodios-titulo">
+                Um cuidado de cada vez
+              </h2>
+              <p className="fw-medium text-white-50 fs-6 m-0">
+                Todos os {episodios.length} episódios desta jornada
+              </p>
+            </div>
+
+            <DropdownSistema
+              opcoes={opcoesJornadas}
+              valorAtual={jornadaId}
+              onChange={(novoId) => navigate(`/jornada/${novoId}`)}
+              temaEscuro={true}
+            />
+          </div>
+
+          <div className="d-flex flex-column">
+            {episodios.map((ep, idx) => (
+              <article key={ep.id || idx} className="is-jornada-episode-item">
+                <div className="row align-items-center g-3">
+                  <div className="col-auto d-none d-sm-block">
+                    <span className="is-jornada-episode-number" aria-hidden="true">
+                      {String(ep.numero || idx + 1).padStart(2, '0')}
+                    </span>
+                  </div>
+
+                  <div className="col-12 col-sm-4 col-md-3">
+                    <div className="is-jornada-thumb-container">
+                      <button
+                        type="button"
+                        className="is-jornada-video-thumbnail"
+                        aria-haspopup="dialog"
+                        onClick={(event) => {
+                          videoTriggerRef.current = event.currentTarget;
+                          setVideoAtivoId(ep.id);
+                        }}
+                        aria-label={`Reproduzir ${ep.titulo}`}
+                      >
+                        <img
+                          src={`https://img.youtube.com/vi/${ep.youtubeId}/mqdefault.jpg`}
+                          alt=""
+                          className="is-jornada-thumbnail-image"
+                          onError={(event) => {
+                            event.currentTarget.src = ep.thumb || jornada.imagemCapa;
+                          }}
+                        />
+                        <span className="position-absolute top-50 start-50 translate-middle" aria-hidden="true">
+                          <span className="btn is-jornada-play-badge">
+                            <Play size={18} fill="currentColor" className="ms-1" />
+                          </span>
+                        </span>
+                      </button>
+                      {ep.concluido && (
+                        <div className="is-jornada-done-badge">
+                          ✓ CONCLUÍDO
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="col">
+                    <h3 className="is-jornada-episode-title">
+                      {ep.titulo}
+                    </h3>
+                    <p className="is-jornada-episode-description">
+                      {ep.descricao}
+                    </p>
+                    <a
+                      href={`https://www.youtube.com/watch?v=${ep.youtubeId}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="is-jornada-youtube-link"
+                    >
+                      Assistir no YouTube <ExternalLink size={14} aria-hidden="true" />
+                    </a>
+                  </div>
+                </div>
+              </article>
             ))}
           </div>
-        </div>
-
-        {abaAtiva === 'episodios' && (
-          <section className="mb-5" id="jornada-episodios">
-            <div className="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
-              <div>
-                <h4 className="fw-bold mb-1 fs-5 text-white">
-                  Um cuidado de cada vez
-                </h4>
-                <p className="fw-medium text-white-50 fs-6 m-0">
-                  Todos os episódios desta jornada
-                </p>
-              </div>
-
-              <DropdownSistema
-                opcoes={opcoesJornadas}
-                valorAtual={jornadaId}
-                onChange={(novoId) => navigate(`/jornada/${novoId}`)}
-                temaEscuro={true}
-              />
-            </div>
-
-            <div className="d-flex flex-column">
-              {episodios.map((ep, idx) => (
-                <div key={ep.id || idx} className="is-jornada-episode-item">
-                  <div className="row align-items-center g-3">
-                    <div className="col-auto d-none d-sm-block">
-                      <span className="is-jornada-episode-number">
-                        {String(ep.numero || idx + 1).padStart(2, '0')}
-                      </span>
-                    </div>
-
-                    <div className="col-12 col-sm-4 col-md-3">
-                      <div className="is-jornada-thumb-container">
-                        <button
-                          type="button"
-                          className="is-jornada-video-thumbnail"
-                          onClick={() => setVideoAtivoId(ep.id)}
-                          aria-label={`Reproduzir ${ep.titulo}`}
-                        >
-                          <img
-                            src={`https://img.youtube.com/vi/${ep.youtubeId}/mqdefault.jpg`}
-                            alt=""
-                            className="is-jornada-thumbnail-image"
-                            onError={(event) => {
-                              event.currentTarget.src = ep.thumb || jornada.imagemCapa;
-                            }}
-                          />
-                          <span className="position-absolute top-50 start-50 translate-middle">
-                            <span className="btn is-jornada-play-badge">
-                              <Play size={18} fill="currentColor" className="ms-1" />
-                            </span>
-                          </span>
-                        </button>
-                        {ep.concluido && (
-                          <div className="is-jornada-done-badge">
-                            ✓ CONCLUÍDO
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="col">
-                      <h5 className="fw-bold mb-2 fs-6 text-white">
-                        {ep.titulo}
-                      </h5>
-                      <p className="fw-medium mb-0 text-white-50 fs-6">
-                        {ep.descricao}
-                      </p>
-                      <a
-                        href={`https://www.youtube.com/watch?v=${ep.youtubeId}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="d-inline-flex align-items-center gap-1 mt-2 text-is-orange"
-                      >
-                        Assistir no YouTube <ExternalLink size={14} />
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {abaAtiva === 'noticias' && (
-          <section className="mb-5">
-            <div className="row g-4">
-              {noticias.length > 0 ? (
-                noticias.map((noticia, idx) => (
-                  <div key={noticia.id || idx} className="col-12 col-md-4">
-                    <div className="h-100 rounded-4 overflow-hidden d-flex flex-column shadow-sm bg-is-green">
-                      <div className="position-relative overflow-hidden" style={{ height: '180px' }}>
-                        <img
-                          src={jornada.imagemCapa}
-                          alt={noticia.titulo}
-                          className="w-100 h-100 object-fit-cover"
-                        />
-                      </div>
-                      <div className="p-4 d-flex flex-column flex-grow-1">
-                        <span className="text-uppercase fw-bold d-block mb-2 text-is-orange fs-7">
-                          {noticia.categoria || 'SAÚDE'}
-                        </span>
-                        <h5 className="fw-bold mb-2 fs-6 text-white">
-                          {noticia.titulo}
-                        </h5>
-                        <p className="fw-medium flex-grow-1 text-white-50 fs-6">
-                          {noticia.resumo || 'Informação para complementar a sua jornada de cuidado.'}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="col-12 text-center py-5">
-                  <p className="fw-bold text-white-50">
-                    Notícias relacionadas em breve.
-                  </p>
-                </div>
-              )}
-            </div>
-          </section>
-        )}
+        </section>
 
         <section className="pt-4 border-top border-secondary border-opacity-25">
           <div className="d-flex align-items-center justify-content-between mb-4">
@@ -271,37 +245,15 @@ export function JornadaDetalhes({ jornadaData: propJornada }) {
             </div>
           </div>
 
-          <div className="row g-4">
+          <div className="is-jornada-other-links">
             {outrasJornadas.map((j) => (
-              <div key={j.id} className="col-12 col-md-6">
-                <Link to={`/jornada/${j.id}`} className="is-jornada-other-card">
-                  {j.imagemCapa && (
-                    <img
-                      src={j.imagemCapa}
-                      alt={j.titulo}
-                      className="position-absolute top-0 start-0 w-100 h-100 object-fit-cover"
-                    />
-                  )}
-                  <div className="is-jornada-other-overlay" />
-                  <div className="is-jornada-other-content">
-                    <span className="text-uppercase fw-bold d-block mb-1 text-white-50 fs-7">
-                      {j.episodios?.length || 0} EPISÓDIOS
-                    </span>
-                    <div className="d-flex align-items-center justify-content-between">
-                      <h3 className="fw-bold mb-0 text-white fs-5">
-                        {j.titulo}
-                      </h3>
-                      <button
-                        type="button"
-                        className="btn is-jornada-play-badge"
-                        aria-label={`Ver ${j.titulo}`}
-                      >
-                        <Play size={18} fill="currentColor" className="ms-1" />
-                      </button>
-                    </div>
-                  </div>
-                </Link>
-              </div>
+              <Link
+                key={j.id}
+                to={`/jornada/${j.id}`}
+                className="is-jornada-other-link"
+              >
+                {j.titulo}
+              </Link>
             ))}
           </div>
         </section>
@@ -317,13 +269,15 @@ export function JornadaDetalhes({ jornadaData: propJornada }) {
             className="is-video-modal"
             role="dialog"
             aria-modal="true"
-            aria-label={videoAtivo.titulo}
+            aria-labelledby="is-video-modal-title"
             onClick={(event) => event.stopPropagation()}
+            ref={videoDialogRef}
           >
             <button
               type="button"
               className="is-video-modal-close"
               onClick={() => setVideoAtivoId(null)}
+              ref={videoCloseButtonRef}
               aria-label="Fechar vídeo"
             >
               <X size={24} />
@@ -337,11 +291,11 @@ export function JornadaDetalhes({ jornadaData: propJornada }) {
                 allowFullScreen
               />
             </div>
-            <h2 className="is-video-modal-title">{videoAtivo.titulo}</h2>
+            <h2 className="is-video-modal-title" id="is-video-modal-title">{videoAtivo.titulo}</h2>
             <a
               href={`https://www.youtube.com/watch?v=${videoAtivo.youtubeId}`}
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
               className="is-video-modal-link"
             >
               Assistir no YouTube <ExternalLink size={16} />

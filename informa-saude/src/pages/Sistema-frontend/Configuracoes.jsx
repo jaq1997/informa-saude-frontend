@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Bell, Trash2 } from 'lucide-react';
 
 import { useUser } from '../../context/userContextStore';
+import { excluirConta } from '../../api/api';
 import { obterFotoPerfil } from '../../utils/fotoPerfil';
 import {
   obterNomeUsuario,
@@ -18,7 +20,8 @@ import {
 } from '../../components';
 
 export function Configuracoes() {
-  const { usuario } = useUser();
+  const navigate = useNavigate();
+  const { usuario, sair } = useUser();
 
   const [modalDeletar, setModalDeletar] = useState(false);
   const [notificacoesAtivas, setNotificacoesAtivas] = useState(true);
@@ -52,14 +55,18 @@ export function Configuracoes() {
     };
   }, [usuario?.avatar_url, usuario?.email, usuario?.usuario_id]);
 
-  const handleDeletarConta = () => {
-    setModalDeletar(false);
-
-    setToastConfig({
-      mensagem:
-        'A exclusão de conta ainda não está disponível. Nenhum dado foi removido.',
-      tipo: 'neutro',
-    });
+  const handleDeletarConta = async () => {
+    try {
+      await excluirConta();
+      sair();
+      navigate('/');
+    } catch (e) {
+      setToastConfig({
+        mensagem: e.message || 'Erro ao excluir a conta. Tente novamente.',
+        tipo: 'erro',
+      });
+      setModalDeletar(false);
+    }
   };
 
   const handleToggleNotificacoes = (e) => {
@@ -153,7 +160,7 @@ export function Configuracoes() {
                       </span>
 
                       <span className="text-muted fs-6">
-                        Exclusão de conta ainda não disponível
+                        Excluir permanentemente sua conta e todos os seus dados
                       </span>
                     </div>
                   </div>
@@ -168,10 +175,10 @@ export function Configuracoes() {
         aberto={modalDeletar}
         onClose={() => setModalDeletar(false)}
         onConfirmar={handleDeletarConta}
-        titulo="Exclusão de conta indisponível"
-        mensagem="A exclusão definitiva da conta ainda não foi integrada ao servidor. Nenhum dado será removido ao continuar."
-        textoConfirmar="Entendi"
-        textoCancelar="Voltar"
+        titulo="Excluir conta definitivamente?"
+        mensagem="Esta ação é permanente e não poderá ser desfeita. Todos os seus dados, jornadas e histórico de saúde serão excluídos do sistema."
+        textoConfirmar="Sim, excluir conta"
+        textoCancelar="Cancelar"
       />
 
       <ToastFeedback

@@ -55,6 +55,94 @@ export async function buscarPerfil() {
   return resp.json();
 }
 
+export async function atualizarPerfil(dados) {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    throw new Error("Usuário não autenticado.");
+  }
+
+  const resp = await fetch(`${API}/me`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + token,
+    },
+    body: JSON.stringify(dados),
+  });
+
+  const resposta = await resp.json().catch(() => ({}));
+
+  if (!resp.ok) {
+    const msg = Array.isArray(resposta.detail)
+      ? resposta.detail.map((e) => e.msg).join(", ")
+      : resposta.detail || "Não foi possível atualizar os dados do perfil.";
+    const erro = new Error(msg);
+    erro.status = resp.status;
+    throw erro;
+  }
+
+  if (resposta.access_token) {
+    localStorage.setItem("token", resposta.access_token);
+    localStorage.setItem("access_token", resposta.access_token);
+  }
+
+  return resposta;
+}
+
+export async function enviarFotoPerfil(arquivo) {
+  const token = localStorage.getItem("token");
+  if (!token) throw new Error("Usuário não autenticado.");
+
+  const formData = new FormData();
+  formData.append("foto", arquivo);
+
+  const resp = await fetch(`${API}/me/foto`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: formData,
+  });
+
+  const dados = await resp.json().catch(() => ({}));
+
+  if (!resp.ok) {
+    const msg = Array.isArray(dados.detail)
+      ? dados.detail.map((e) => e.msg).join(", ")
+      : dados.detail || "Erro ao enviar foto de perfil.";
+    const erro = new Error(msg);
+    erro.status = resp.status;
+    throw erro;
+  }
+
+  return dados;
+}
+
+export async function removerFotoPerfil() {
+  const token = localStorage.getItem("token");
+  if (!token) throw new Error("Usuário não autenticado.");
+
+  const resp = await fetch(`${API}/me/foto`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const dados = await resp.json().catch(() => ({}));
+
+  if (!resp.ok) {
+    const msg = Array.isArray(dados.detail)
+      ? dados.detail.map((e) => e.msg).join(", ")
+      : dados.detail || "Erro ao remover foto de perfil.";
+    const erro = new Error(msg);
+    erro.status = resp.status;
+    throw erro;
+  }
+
+  return dados;
+}
+
 export const pedirCodigo = (email) =>
   chamar("/auth/recuperar/pedir", { email });
 
@@ -66,6 +154,31 @@ export const definirNovaSenha = (reset_token, nova_senha) =>
 
 export const alterarSenha = (senha_atual, nova_senha) =>
   chamar("/me/senha", { senha_atual, nova_senha }, { auth: true });
+
+export async function excluirConta() {
+  const token = localStorage.getItem("token");
+  if (!token) throw new Error("Usuário não autenticado.");
+
+  const resp = await fetch(`${API}/me`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const dados = await resp.json().catch(() => ({}));
+
+  if (!resp.ok) {
+    const msg = Array.isArray(dados.detail)
+      ? dados.detail.map((e) => e.msg).join(", ")
+      : dados.detail || "Erro ao excluir conta.";
+    const erro = new Error(msg);
+    erro.status = resp.status;
+    throw erro;
+  }
+
+  return dados;
+}
 
 
 export async function buscarDashboard() {

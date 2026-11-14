@@ -1049,3 +1049,7 @@ html.alto-contraste .xp-bar.is-current {
 html.alto-contraste .stat-card-icon {
   color: var(--is-contrast-accent) !important;
 }
+
+html.alto-contraste .is-footer-green .btn-close {
+  filter: brightness(0) !important;
+}

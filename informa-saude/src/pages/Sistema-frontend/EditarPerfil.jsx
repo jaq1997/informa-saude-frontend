@@ -6,9 +6,11 @@ import {
   FormInput,
   TituloPaginaSistema,
   CardPerfilSidebar,
+  BotaoSistema,
 } from '../../components';
 
 import { useUser } from '../../context/userContextStore';
+import { atualizarPerfil, enviarFotoPerfil, removerFotoPerfil } from '../../api/api';
 import { obterFotoPerfil, salvarFotoPerfil } from '../../utils/fotoPerfil';
 import { resolverFoto } from '../../utils/usuario';
 
@@ -31,6 +33,20 @@ const formatarDataNascimento = (valor) => {
   return valorFormatado;
 };
 
+const formatarTelefone = (valor) => {
+  const limpo = String(valor ?? '').replace(/\D/g, '').slice(0, 11);
+  if (limpo.length > 10) {
+    return limpo.replace(/^(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+  }
+  if (limpo.length > 6) {
+    return limpo.replace(/^(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3');
+  }
+  if (limpo.length > 2) {
+    return limpo.replace(/^(\d{2})(\d{0,5})/, '($1) $2');
+  }
+  return limpo;
+};
+
 const obterDataNascimento = (usuario) => {
   const data =
     usuario?.dataNascimento ||
@@ -46,7 +62,7 @@ const obterDataNascimento = (usuario) => {
 };
 
 export function EditarPerfil() {
-  const { usuario } = useUser();
+  const { usuario, atualizarUsuario } = useUser();
 
   const nomeAtual = usuario?.nome ?? '';
   const emailAtual = usuario?.email ?? '';
@@ -54,14 +70,18 @@ export function EditarPerfil() {
   const dataNascimentoAtual = obterDataNascimento(usuario);
 
   const [nome, setNome] = useState(nomeAtual);
-  const [email, setEmail] = useState(emailAtual);
   const [telefone, setTelefone] = useState(telefoneAtual);
-  const [dataNascimento, setDataNascimento] = useState(
-    dataNascimentoAtual
-  );
+  const [dataNascimento, setDataNascimento] = useState(dataNascimentoAtual);
 
   const [modoEdicao, setModoEdicao] = useState(false);
+  const [salvando, setSalvando] = useState(false);
   const [toastFotoMsg, setToastFotoMsg] = useState(null);
+  const [toastFeedback, setToastFeedback] = useState({
+    visivel: false,
+    titulo: '',
+    mensagem: '',
+    tipo: 'sucesso',
+  });
 
   const [foto, setFoto] = useState(
     () => obterFotoPerfil() ?? resolverFoto(usuario?.avatar_url)
@@ -75,10 +95,7 @@ export function EditarPerfil() {
     };
 
     window.addEventListener('storage', atualizarFoto);
-    window.addEventListener(
-      'foto-perfil-atualizada',
-      atualizarFoto
-    );
+    window.addEventListener('foto-perfil-atualizada', atualizarFoto);
 
     return () => {
       window.removeEventListener('storage', atualizarFoto);
@@ -92,18 +109,13 @@ export function EditarPerfil() {
   const atualizarFotoPerfil = (novaFoto) => {
     salvarFotoPerfil(novaFoto);
 
-    setFoto(
-      novaFoto ?? resolverFoto(usuario?.avatar_url)
-    );
+    setFoto(novaFoto ?? resolverFoto(usuario?.avatar_url));
 
-    window.dispatchEvent(
-      new Event('foto-perfil-atualizada')
-    );
+    window.dispatchEvent(new Event('foto-perfil-atualizada'));
   };
 
   const handleIniciarEdicao = () => {
     setNome(nomeAtual);
-    setEmail(emailAtual);
     setTelefone(telefoneAtual);
     setDataNascimento(dataNascimentoAtual);
     setModoEdicao(true);
@@ -111,10 +123,69 @@ export function EditarPerfil() {
 
   const handleCancelarEdicao = () => {
     setNome(nomeAtual);
-    setEmail(emailAtual);
     setTelefone(telefoneAtual);
     setDataNascimento(dataNascimentoAtual);
     setModoEdicao(false);
+  };
+
+  const handleSalvar = async (e) => {
+    e.preventDefault();
+
+    const nomeTratado = nome.trim();
+    if (!nomeTratado) {
+      setToastFeedback({
+        visivel: true,
+        titulo: 'Nome obrigatório',
+        mensagem: 'Por favor, informe seu nome completo.',
+        tipo: 'erro',
+      });
+      return;
+    }
+
+    const dataTratada = dataNascimento.trim();
+    if (dataTratada && dataTratada.length > 0 && dataTratada.length < 10) {
+      setToastFeedback({
+        visivel: true,
+        titulo: 'Data incompleta',
+        mensagem: 'Por favor, informe a data de nascimento completa no formato DD/MM/AAAA.',
+        tipo: 'erro',
+      });
+      return;
+    }
+
+    setSalvando(true);
+    try {
+      const resposta = await atualizarPerfil({
+        nome: nomeTratado,
+        telefone: telefone.trim() || null,
+        data_nascimento: dataTratada || null,
+      });
+
+      atualizarUsuario({
+        nome: resposta.nome,
+        telefone: resposta.telefone ?? '',
+        data_nascimento: resposta.data_nascimento ?? '',
+        sexo: resposta.sexo ?? '',
+      });
+
+      setToastFeedback({
+        visivel: true,
+        titulo: 'Perfil atualizado',
+        mensagem: 'Seus dados foram salvos com sucesso!',
+        tipo: 'sucesso',
+      });
+
+      setModoEdicao(false);
+    } catch (erro) {
+      setToastFeedback({
+        visivel: true,
+        titulo: 'Não foi possível salvar',
+        mensagem: erro.message || 'Ocorreu um erro ao atualizar o perfil. Tente novamente.',
+        tipo: 'erro',
+      });
+    } finally {
+      setSalvando(false);
+    }
   };
 
   return (
@@ -135,22 +206,48 @@ export function EditarPerfil() {
           <div className="col-12 col-lg-4">
             <CardPerfilSidebar
               nome={modoEdicao ? nome : nomeAtual}
-              email={modoEdicao ? email : emailAtual}
+              email={emailAtual}
               foto={foto}
               podeEditar
-              onAlterarFoto={(novaUrl) => {
-                atualizarFotoPerfil(novaUrl);
-
-                setToastFotoMsg(
-                  'Foto de perfil atualizada neste dispositivo!'
-                );
+              onAlterarFoto={async (novaUrl, arquivo) => {
+                if (arquivo) {
+                  try {
+                    const resp = await enviarFotoPerfil(arquivo);
+                    atualizarUsuario({ avatar_url: resp.avatar_url });
+                    setFoto(resp.avatar_url);
+                    salvarFotoPerfil(null);
+                    setToastFotoMsg(
+                      'Foto de perfil salva com sucesso no Cloudflare!'
+                    );
+                  } catch (e) {
+                    setToastFeedback({
+                      visivel: true,
+                      titulo: 'Erro ao enviar foto',
+                      mensagem:
+                        e.message || 'Não foi possível salvar a foto no servidor.',
+                      tipo: 'erro',
+                    });
+                  }
+                } else {
+                  atualizarFotoPerfil(novaUrl);
+                }
               }}
-              onRemoverFoto={() => {
-                atualizarFotoPerfil(null);
-
-                setToastFotoMsg(
-                  'Foto local removida com sucesso!'
-                );
+              onRemoverFoto={async () => {
+                try {
+                  await removerFotoPerfil();
+                  atualizarUsuario({ avatar_url: null });
+                  atualizarFotoPerfil(null);
+                  setToastFotoMsg(
+                    'Foto de perfil removida com sucesso!'
+                  );
+                } catch (e) {
+                  setToastFeedback({
+                    visivel: true,
+                    titulo: 'Erro ao remover foto',
+                    mensagem: e.message || 'Não foi possível remover a foto.',
+                    tipo: 'erro',
+                  });
+                }
               }}
             />
           </div>
@@ -163,38 +260,24 @@ export function EditarPerfil() {
                 </h2>
 
                 {!modoEdicao && (
-                  <button
-                    type="button"
-                    className="is-btn is-btn--profile is-btn--outline-green fs-6"
+                  <BotaoSistema
+                    tipo="button"
+                    variante="outline-green"
                     onClick={handleIniciarEdicao}
                   >
                     Editar
-                  </button>
+                  </BotaoSistema>
                 )}
               </div>
 
               {!modoEdicao && (
                 <p className="text-muted small mb-3">
                   Seus dados estão em modo de leitura. Selecione{' '}
-                  <strong>Editar</strong> para visualizar o formulário.
+                  <strong>Editar</strong> para alterar seu nome, telefone ou data de nascimento.
                 </p>
               )}
 
-              {modoEdicao && (
-                <div
-                  className="alert alert-warning py-2 px-3 fs-6 mb-3"
-                  role="status"
-                >
-                  A atualização dos dados cadastrais ainda não está
-                  integrada ao servidor. Nenhuma alteração será salva.
-                </div>
-              )}
-
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                }}
-              >
+              <form onSubmit={handleSalvar}>
                 <div className="row g-3">
                   <div className="col-12 col-md-6">
                     <FormInput
@@ -218,16 +301,14 @@ export function EditarPerfil() {
                       id="email"
                       label="E-mail"
                       type="email"
-                      value={modoEdicao ? email : emailAtual}
-                      onChange={(e) => setEmail(e.target.value)}
-                      readOnly={!modoEdicao}
-                      inputClassName={
-                        !modoEdicao
-                          ? 'is-profile-input-readonly'
-                          : ''
-                      }
-                      required
+                      value={emailAtual}
+                      readOnly={true}
+                      inputClassName="is-profile-input-readonly"
+                      disabled={true}
                     />
+                    <small className="text-muted d-block mt-1">
+                      O e-mail é a chave de acesso à conta e não pode ser alterado.
+                    </small>
                   </div>
 
                   <div className="col-12 col-md-6">
@@ -235,8 +316,9 @@ export function EditarPerfil() {
                       id="telefone"
                       label="Telefone"
                       type="tel"
+                      placeholder="(99) 99999-9999"
                       value={modoEdicao ? telefone : telefoneAtual}
-                      onChange={(e) => setTelefone(e.target.value)}
+                      onChange={(e) => setTelefone(formatarTelefone(e.target.value))}
                       readOnly={!modoEdicao}
                       inputClassName={
                         !modoEdicao
@@ -274,14 +356,23 @@ export function EditarPerfil() {
                 </div>
 
                 {modoEdicao && (
-                  <div className="is-modal-actions mt-4">
-                    <button
-                      type="button"
-                      className="is-btn is-btn--profile is-btn--outline-green fs-6"
+                  <div className="is-modal-actions mt-4 d-flex align-items-center gap-3">
+                    <BotaoSistema
+                      tipo="submit"
+                      variante="orange"
+                      desabilitado={salvando}
+                    >
+                      {salvando ? 'Salvando...' : 'Salvar alterações'}
+                    </BotaoSistema>
+
+                    <BotaoSistema
+                      tipo="button"
+                      variante="outline-green"
                       onClick={handleCancelarEdicao}
+                      desabilitado={salvando}
                     >
                       Cancelar
-                    </button>
+                    </BotaoSistema>
                   </div>
                 )}
               </form>
@@ -289,6 +380,14 @@ export function EditarPerfil() {
           </div>
         </div>
       </main>
+
+      <ToastFeedback
+        visivel={toastFeedback.visivel}
+        onClose={() => setToastFeedback((prev) => ({ ...prev, visivel: false }))}
+        titulo={toastFeedback.titulo}
+        mensagem={toastFeedback.mensagem}
+        tipo={toastFeedback.tipo}
+      />
 
       <ToastFeedback
         visivel={!!toastFotoMsg}

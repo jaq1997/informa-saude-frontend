@@ -8,7 +8,8 @@ export function ItemMeuPerfil({
   descricao,
   to,
   onClick,
-  perigo = false
+  perigo = false,
+  desabilitado = false,
 }) {
   const conteudoInner = (
     <>
@@ -27,13 +28,15 @@ export function ItemMeuPerfil({
           )}
         </div>
       </div>
-      <ChevronRight size={22} className="text-muted ms-2 mt-1 flex-shrink-0" />
+      {!desabilitado && (
+        <ChevronRight size={22} className="text-muted ms-2 mt-1 flex-shrink-0" />
+      )}
     </>
   );
 
-  const classeBase = `is-profile-option d-flex align-items-start justify-content-between p-3 rounded-3 bg-light text-decoration-none text-dark border w-100 text-start transition-all ${perigo ? 'is-danger' : ''}`;
+  const classeBase = `is-profile-option d-flex align-items-start justify-content-between p-3 rounded-3 bg-light text-decoration-none text-dark border w-100 text-start transition-all ${perigo ? 'is-danger' : ''} ${desabilitado ? 'opacity-75 cursor-default' : ''}`;
 
-  if (to) {
+  if (to && !desabilitado) {
     return (
       <Link to={to} className={classeBase}>
         {conteudoInner}
@@ -42,7 +45,12 @@ export function ItemMeuPerfil({
   }
 
   return (
-    <button type="button" onClick={onClick} className={classeBase}>
+    <button
+      type="button"
+      onClick={desabilitado ? undefined : onClick}
+      disabled={desabilitado}
+      className={classeBase}
+    >
       {conteudoInner}
     </button>
   );

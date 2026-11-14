@@ -1,6 +1,6 @@
-import imgSono from '../assets/images/imagem-sono.webp';
-import imgCardiaca from '../assets/images/imagem-cardiaca.webp';
-import imgRespiracao from '../assets/images/imagem-respiracao.webp';
+import imgSono from '../assets/images/sleep.jpg';
+import imgCardiaca from '../assets/images/cardiac-hero.jpg';
+import imgRespiracao from '../assets/images/breathing.jpg';
 
 /**
  * Catálogo central de Jornadas de Saúde.
@@ -78,6 +78,7 @@ export const JORNADAS_DATA = {
     categoria: 'Bem-estar',
     descricao: 'Vídeos educativos sobre sono, hábitos e descanso em diferentes rotinas.',
     imagemCapa: imgSono,
+    espelharImagemCapa: true,
     progresso: 0,
     episodios: [
       {
@@ -116,6 +117,7 @@ export const JORNADAS_DATA = {
     categoria: 'Saúde respiratória',
     descricao: 'Conteúdos educativos sobre doenças respiratórias, prevenção e cuidados com a respiração.',
     imagemCapa: imgRespiracao,
+    espelharImagemCapa: true,
     progresso: 0,
     episodios: [
       {

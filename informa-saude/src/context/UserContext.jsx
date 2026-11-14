@@ -3,9 +3,14 @@ import { buscarPerfil } from '../api/api';
 import { UserContext } from './userContextStore';
 
 const USUARIO_VAZIO = {
+  usuario_id: null,
   nome: '',
   email: '',
+  telefone: '',
+  data_nascimento: '',
+  sexo: '',
   avatar_url: null,
+  provider: 'LOCAL',
 };
 
 const CHAVE_USUARIO = 'informa-saude-usuario-ativo';
@@ -99,15 +104,23 @@ export function UserProvider({ children }) {
         usuario_id: perfil.id,
         nome: perfil.nome,
         email: perfil.email,
-        avatar_url: perfil.avatar_url,
+        telefone: perfil.telefone ?? '',
+        data_nascimento: perfil.data_nascimento ?? '',
+        sexo: perfil.sexo ?? '',
+        avatar_url: perfil.avatar_url ?? null,
+        provider: perfil.provider ?? 'LOCAL',
       });
+
+      if (perfil.jornada_recomendada !== undefined) {
+        atualizarJornada(perfil.jornada_recomendada);
+      }
 
       return perfil;
     } catch (erro) {
       sair();
       throw erro;
     }
-  }, [atualizarUsuario, sair]);
+  }, [atualizarJornada, atualizarUsuario, sair]);
 
   useEffect(() => {
     if (!localStorage.getItem('token')) return;
@@ -137,8 +150,16 @@ export function UserProvider({ children }) {
           usuario_id: perfil.id,
           nome: perfil.nome,
           email: perfil.email,
-          avatar_url: perfil.avatar_url,
+          telefone: perfil.telefone ?? '',
+          data_nascimento: perfil.data_nascimento ?? '',
+          sexo: perfil.sexo ?? '',
+          avatar_url: perfil.avatar_url ?? null,
+          provider: perfil.provider ?? 'LOCAL',
         });
+
+        if (perfil.jornada_recomendada !== undefined) {
+          atualizarJornada(perfil.jornada_recomendada);
+        }
       } catch {
         if (ativo) {
           sair();
@@ -151,7 +172,7 @@ export function UserProvider({ children }) {
     return () => {
       ativo = false;
     };
-  }, [atualizarUsuario, sair]);
+  }, [atualizarJornada, atualizarUsuario, sair]);
 
   return (
     <UserContext.Provider

@@ -1,9 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User, Gift, BookOpen, Hospital } from 'lucide-react';
-import imgCardiaca from '../../assets/images/imagem-cardiaca.webp';
-import imgSono from '../../assets/images/imagem-sono.webp';
-import imgRespiracao from '../../assets/images/imagem-respiracao.webp';
 import imgProgresso from '../../assets/images/acompanhe-progresso.webp';
 import { JORNADAS_DATA } from '../../data/jornadasData';
 import {
@@ -61,21 +58,24 @@ function obterConteudosEmAndamento(jornadaId) {
 const JORNADAS_RECOMENDADAS = [
   {
     id: 'sono',
-    imagem: imgSono,
+    imagem: JORNADAS_DATA.sono.imagemCapa,
+    imagemEspelhada: JORNADAS_DATA.sono.espelharImagemCapa,
     titulo: 'Jornada do Sono',
     descricao: 'Construa hábitos saudáveis e conheça práticas de higiene do sono para descansar melhor.',
     textoBotao: 'Iniciar Jornada'
   },
   {
     id: 'cardiaca',
-    imagem: imgCardiaca,
+    imagem: JORNADAS_DATA.cardiaca.imagemCapa,
+    imagemEspelhada: JORNADAS_DATA.cardiaca.espelharImagemCapa,
     titulo: 'Jornada Cardíaca',
     descricao: 'Aprenda como pequenos hábitos diários podem auxiliar na prevenção e no cuidado cardiovascular.',
     textoBotao: 'Iniciar Jornada'
   },
   {
     id: 'respiratoria',
-    imagem: imgRespiracao,
+    imagem: JORNADAS_DATA.respiratoria.imagemCapa,
+    imagemEspelhada: JORNADAS_DATA.respiratoria.espelharImagemCapa,
     titulo: 'Jornada Respiratória',
     descricao: 'Conheça práticas de respiração e cuidados diários para o bem-estar respiratório.',
     textoBotao: 'Iniciar Jornada'
@@ -130,7 +130,7 @@ export function HomeSistema() {
             descricao={jornadaDestaque.descricao}
             textoBotao={jornadaDestaque.textoBotao}
             to={`/jornada/${jornadaDestaque.id}`}
-            className="mb-5"
+            className={`mb-5 ${jornadaDestaque.imagemEspelhada ? 'is-jornada-card--espelhada' : ''}`}
           />
         ) : (
           <CardSistema
@@ -175,6 +175,7 @@ export function HomeSistema() {
                   titulo={jornada.titulo}
                   textoBotao={jornada.textoBotao}
                   to={`/jornada/${jornada.id}`}
+                  className={jornada.imagemEspelhada ? 'is-jornada-card--espelhada' : ''}
                 />
               </div>
             ))}
@@ -190,6 +191,7 @@ export function HomeSistema() {
             textoBotao="Veja suas estatísticas"
             varianteBotao="outline-white"
             to="/dashboard"
+            className="is-progress-card"
           />
         </section>
       </main>

@@ -27,11 +27,34 @@
   font-size: 0.95rem;
 }
 .button-recover-password {
+  padding: 0;
   border: none;
-  background-color: var(--is-white);
+  background: transparent;
+  color: var(--is-green-dark);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  cursor: pointer;
 }
+
 .button-recover-password:hover {
   color: var(--is-green);
+}
+
+.button-recover-password:focus-visible {
+  outline: 3px solid var(--is-orange);
+  outline-offset: 3px;
+}
+
+.is-google-login {
+  width: 100%;
+  max-width: 350px;
+  min-height: 44px;
+  margin-inline: auto;
+}
+
+.is-google-login iframe {
+  max-width: 100%;
 }
 
 .btn.is-btn--profile,

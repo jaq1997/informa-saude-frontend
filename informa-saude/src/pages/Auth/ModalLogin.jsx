@@ -23,6 +23,7 @@ export function ModalLogin({ onClose, onAbrirCadastro }) {
   const [open, setOpen] = useState(false);
   const [erro, setErro] = useState('');
   const [carregando, setCarregando] = useState(false);
+  const larguraBotaoGoogle = Math.max(220, Math.min(350, window.innerWidth - 72));
 
   useEffect(() => {
     document.body.style.overflow = 'hidden';
@@ -152,19 +153,19 @@ export function ModalLogin({ onClose, onAbrirCadastro }) {
             <hr className="flex-fill my-0 text-muted opacity-25" />
           </div>
 
-          <div className="d-flex justify-content-center">
+          <div className="is-google-login">
             <GoogleLogin
               onSuccess={handleGoogle}
               onError={() =>
                 setErro('Não foi possível entrar com o Google.')
               }
               locale="pt-BR"
-              theme="outline"
+              theme="filled_black"
               size="large"
               shape="pill"
               text="continue_with"
               logo_alignment="center"
-              width="350"
+              width={String(larguraBotaoGoogle)}
             />
           </div>
         </div>

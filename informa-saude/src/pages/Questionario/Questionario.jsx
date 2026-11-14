@@ -232,7 +232,6 @@ export function Questionario() {
               )}
 
               <div className="is-questionnaire-result mb-4" role="status" aria-live="polite">
-                <Loader2 size={24} className="is-questionnaire-spinner spin" aria-hidden="true" />
                 <div>
                   <span>{nomesJornadas[jornadaRecomendada] || 'Jornada Cardíaca'}</span>
                   {jornadasEmpatadas.length > 1 && (
